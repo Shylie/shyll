@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="chunk.cpp" />
+    <ClCompile Include="vm.cpp" />
+    <ClCompile Include="scanner.cpp" />
+    <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="value.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="chunk.h" />
+    <ClInclude Include="value.h" />
+    <ClInclude Include="vm.h" />
+    <ClInclude Include="scanner.h" />
+    <ClInclude Include="compiler.h" />
+  </ItemGroup>
+</Project>
