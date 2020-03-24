@@ -152,6 +152,7 @@
   <ItemGroup>
     <ClCompile Include="chunk.cpp" />
     <ClCompile Include="compiler.cpp" />
+    <ClCompile Include="linker.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="scanner.cpp" />
     <ClCompile Include="value.cpp" />
@@ -160,6 +161,7 @@
   <ItemGroup>
     <ClInclude Include="chunk.h" />
     <ClInclude Include="compiler.h" />
+    <ClInclude Include="linker.h" />
     <ClInclude Include="scanner.h" />
     <ClInclude Include="value.h" />
     <ClInclude Include="vm.h" />

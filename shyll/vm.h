@@ -28,6 +28,7 @@ private:
 	Value* stackTop;
 	Value traceLog;
 	Value error;
+	std::vector<size_t> callStack;
 	std::map<std::string, Value> globals;
 	std::string filename;
 

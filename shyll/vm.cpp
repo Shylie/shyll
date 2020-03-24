@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "vm.h"
-#include "compiler.h"
+#include "linker.h"
 
 VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error("")
 {
@@ -22,8 +22,7 @@ InterpretResult VM::Interpret(const std::string& source)
 	traceLog = ""s;
 	error = ""s;
 
-	chunk = Chunk();
-	if (!Compiler(source).Compile(&chunk)) { return InterpretResult::CompileError; }
+	if (!Linker(source).Link(chunk)) { return InterpretResult::CompileError; }
 
 	uint8_t instruction;
 	for (;;)
@@ -133,7 +132,11 @@ InterpretResult VM::Interpret(const std::string& source)
 			std::string loc = *chunk.ReadConstant(chunk.ReadLong(ip)).Get<std::string>(); ip += 2;
 			if (globals.find(loc) != globals.end())
 			{
-				if (!Push(Value(globals[loc]))) { return InterpretResult::RuntimeError; }
+				if (!Push(Value(globals[loc])))
+				{
+					error = "shit"s;
+					return InterpretResult::RuntimeError;
+				}
 			}
 			else
 			{
@@ -315,6 +318,20 @@ do \
 			Value tmp, tmp2, tmp3;
 			break;
 		}
+
+		case OpCode::JumpToCallStackAddress:
+			if (callStack.empty())
+			{
+				error = "Call stack is empty, cannot jump"s;
+				return InterpretResult::RuntimeError;
+			}
+			ip = callStack.back();
+			callStack.pop_back();
+			break;
+
+		case OpCode::PushJumpAddress:
+			callStack.push_back(ip + 3);
+			break;
 		}
 	}
 }

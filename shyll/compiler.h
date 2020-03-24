@@ -9,25 +9,24 @@ class Compiler
 public:
 	Compiler(const std::string& source);
 
-	bool Compile(Chunk* chunk);
+	std::map<std::string, Chunk>& Compile(bool& success);
 
 private:
-	std::string source;
-	Scanner scanner;
-	Token previousPrevious;
-	Token previous;
-	Token current;
+	std::vector<Token> tokens;
+	size_t currentToken;
+	std::map<std::string, Chunk> symbols;
+	std::string currentSymbol;
 	bool hadError;
 	bool panicMode;
-	std::map<std::string, std::vector<Token>> functions;
-	Chunk* compilingChunk;
+	bool compiled;
 
 	Chunk* CurrentChunk();
+	const Token* PreviousToken();
+	const Token* CurrentToken();
+	const Token* NextToken();
+	const Token* TokenRelative(int offset);
 
-	void Advance(bool read = true);
-	void Consume(Token::Type type, const std::string& message, bool read = true);
-
-	void Instruction(bool read = true);
+	bool Instruction();
 
 	size_t EmitByte(uint8_t byte);
 	size_t EmitByte(OpCode op);
@@ -36,8 +35,8 @@ private:
 	void PatchJump(uint16_t address);
 	void PatchJump(uint16_t address, uint16_t jumpAddress);
 
-	void EndCompile();
+	void EndSymbol();
 
-	void Error(const std::string& message);
+	void WarnAt(const Token& token, const std::string& message);
 	void ErrorAt(const Token& token, const std::string& message);
 };

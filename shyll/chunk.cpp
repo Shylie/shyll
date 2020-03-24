@@ -73,6 +73,23 @@ size_t Chunk::AddConstant(const Value& value, int line, OpCode ifShort, OpCode i
 	return AddConstant(value, line, ifShort, ifLong, throwaway);
 }
 
+void Chunk::AddMeta(size_t offset, const Value& metadata)
+{
+	meta[offset] = metadata;
+}
+
+const Value* Chunk::GetMeta(size_t offset) const
+{
+	if (meta.find(offset) != meta.end())
+	{
+		return &meta.at(offset);
+	}
+	else
+	{
+		return nullptr;
+	}
+}
+
 void Chunk::Modify(size_t offset, uint8_t nval)
 {
 	instructions[offset] = nval;
@@ -82,6 +99,34 @@ void Chunk::ModifyLong(size_t offset, uint16_t nval)
 {
 	instructions[offset] = static_cast<uint8_t>(UINT8_MAX & (nval >> 8));
 	instructions[offset + 1] = static_cast<uint8_t>(UINT8_MAX & nval);
+}
+
+void Chunk::ModifyConstant(size_t offset, const Value& value)
+{
+	for (size_t i = 0; i < values.size(); i++)
+	{
+		if ((value == values[i]).Get<bool>() && *(value == values[i]).Get<bool>())
+		{
+			if (i > UINT8_MAX)
+			{
+				ModifyLong(offset, i);
+			}
+			else
+			{
+				Modify(offset, i);
+			}
+			return;
+		}
+	}
+	if (values.size() + 1 >= UINT8_MAX)
+	{
+		ModifyLong(offset, values.size());
+	}
+	else
+	{
+		Modify(offset, values.size());
+	}
+	values.push_back(value);
 }
 
 uint8_t Chunk::Read(size_t offset) const
@@ -97,6 +142,23 @@ uint16_t Chunk::ReadLong(size_t offset) const
 Value Chunk::ReadConstant(uint16_t index) const
 {
 	return values[index];
+}
+
+int Chunk::ReadLine(size_t offset) const
+{
+	size_t curlen = 0;
+	size_t total = 0;
+	for (size_t i = 0; i < lines.size(); i++)
+	{
+		while (curlen < lines[i].len)
+		{
+			if (total == offset) { return lines[i].line; }
+			total++;
+			curlen++;
+		}
+		curlen = 0;
+	}
+	return -1;
 }
 
 void Chunk::Disassemble(const std::string& name) const
@@ -220,6 +282,12 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 	case OpCode::JumpIfFalse:
 		return JumpInstruction("OP_JUMP_IF_FALSE", offset);
 
+	case OpCode::JumpToCallStackAddress:
+		return SimpleInstruction("OP_JUMP_TO_CALL_STACK_ADDRESS", offset);
+
+	case OpCode::PushJumpAddress:
+		return SimpleInstruction("OP_PUSH_JUMP_ADDRESS", offset);
+
 	default:
 		std::cout << "Unknown opcode " << instruction << '\n';
 		return offset + 1;
@@ -241,23 +309,6 @@ void Chunk::WriteLine(int line)
 	{
 		lines.push_back(LineInfo{ 1, line });
 	}
-}
-
-int Chunk::ReadLine(size_t offset) const
-{
-	size_t curlen = 0;
-	size_t total = 0;
-	for (size_t i = 0; i < lines.size(); i++)
-	{
-		while (curlen < lines[i].len)
-		{
-			if (total == offset) { return lines[i].line; }
-			total++;
-			curlen++;
-		}
-		curlen = 0;
-	}
-	return -1;
 }
 
 size_t Chunk::SimpleInstruction(const std::string& name, size_t offset) const
