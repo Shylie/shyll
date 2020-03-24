@@ -90,6 +90,8 @@ const Value Value::operator-(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return Value(*Get<double>() - *val.Get<double>()); }
 	if (Get<long>() && val.Get<long>()) { return Value(*Get<long>() - *val.Get<long>()); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() - *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() - *val.Get<double>(); }
 	return Value();
 }
 
@@ -97,6 +99,8 @@ const Value Value::operator*(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return Value(*Get<double>() * *val.Get<double>()); }
 	if (Get<long>() && val.Get<long>()) { return Value(*Get<long>() * *val.Get<long>()); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() / *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() / *val.Get<double>(); }
 	return Value();
 }
 
@@ -104,6 +108,8 @@ const Value Value::operator/(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return Value(*Get<double>() / *val.Get<double>()); }
 	if (Get<long>() && val.Get<long>()) { return Value(*Get<long>() / *val.Get<long>()); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() / *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() / *val.Get<double>(); }
 	return Value();
 }
 
@@ -111,6 +117,8 @@ const Value Value::operator<(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return *Get<double>() < *val.Get<double>(); }
 	if (Get<long>() && val.Get<long>()) { return *Get<long>() < *val.Get<long>(); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() < *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() < *val.Get<double>(); }
 	return Value();
 }
 
@@ -118,6 +126,8 @@ const Value Value::operator<=(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return *Get<double>() <= *val.Get<double>(); }
 	if (Get<long>() && val.Get<long>()) { return *Get<long>() <= *val.Get<long>(); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() <= *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() <= *val.Get<double>(); }
 	return Value();
 }
 
@@ -125,6 +135,8 @@ const Value Value::operator>(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return *Get<double>() > *val.Get<double>(); }
 	if (Get<long>() && val.Get<long>()) { return *Get<long>() > *val.Get<long>(); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() > *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() > *val.Get<double>(); }
 	return Value();
 }
 
@@ -132,6 +144,8 @@ const Value Value::operator>=(const Value& val) const
 {
 	if (Get<double>() && val.Get<double>()) { return *Get<double>() >= *val.Get<double>(); }
 	if (Get<long>() && val.Get<long>()) { return *Get<long>() >= *val.Get<long>(); }
+	if (Get<double>() && val.Get<long>()) { return *Get<double>() >= *val.Get<long>(); }
+	if (Get<long>() && val.Get<double>()) { return *Get<long>() >= *val.Get<double>(); }
 	return Value();
 }
 
