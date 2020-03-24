@@ -17,6 +17,8 @@ int main(int argc, char** argv)
 
 			VM* vm = new VM();
 
+			std::cerr << '\n';
+
 			InterpretResult result = vm->Interpret(out.str());
 
 			switch (result)
@@ -27,20 +29,19 @@ int main(int argc, char** argv)
 				return 0;
 
 			case InterpretResult::CompileError:
-				std::cout << "Compilation error";
-
+				std::cerr << "Compilation error";
 				delete vm;
 				return 1;
 
 			case InterpretResult::RuntimeError:
-				std::cout << "Runtime error: " << vm->ErrorMessage();
+				std::cerr << "Runtime error: " << vm->ErrorMessage();
 				delete vm;
 				return 2;
 			}
 		}
 		else
 		{
-			std::cout << "Unable to open file '" << argv[1] << '\'';
+			std::cerr << "Unable to open file '" << argv[1] << '\'';
 			return -1;
 		}
 	}
@@ -50,27 +51,48 @@ int main(int argc, char** argv)
 		for (;;)
 		{
 			std::string line;
+			std::string code;
+			bool confirm = false;
 
-			std::cout << ">> ";
-			std::getline(std::cin, line);
-			std::cout << '\n';
+			std::cerr << "\n>| ";
+			for (;;)
+			{
+				std::getline(std::cin, line);
+				if (line.empty())
+				{
+					if (confirm || !code.empty())
+					{
+						break;
+					}
+					else
+					{
+						confirm = true;
+						std::cerr << " | ";
+						continue;
+					}
+				}
+				std::cerr << " | ";
+				code += ' ' + line;
+			}
 
-			if (line == "quit") { break; }
+			std::cerr << '\n';
 
-			switch (vm->Interpret(line))
+			if (code.empty()) { break; }
+
+			switch (vm->Interpret(code))
 			{
 			case InterpretResult::Ok:
 				break;
 
 			case InterpretResult::CompileError:
-				std::cout << "\nCompilation Error.\n";
+				std::cerr << "\nCompilation Error.\n";
 				break;
 
 			case InterpretResult::RuntimeError:
-				std::cout << "\nRuntime Error: " << vm->ErrorMessage() << '\n';
+				std::cerr << "\nRuntime Error: " << vm->ErrorMessage() << '\n';
 				break;
 			}
-			std::cout << '\n';
+			std::cerr << '\n';
 		}
 		delete vm;
 

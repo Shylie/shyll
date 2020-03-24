@@ -43,6 +43,8 @@ public:
 		Do,
 		Loop,
 
+		Print,
+		PrintLn,
 		Trace,
 		ShowTraceLog,
 		ClearTraceLog,
