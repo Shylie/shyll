@@ -20,7 +20,6 @@ public:
 		Create,
 		FunctionCall,
 		FunctionHeader,
-		FunctionFooter,
 
 		Add,
 		Subtract,

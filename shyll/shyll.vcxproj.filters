@@ -7,6 +7,7 @@
     <ClCompile Include="scanner.cpp" />
     <ClCompile Include="compiler.cpp" />
     <ClCompile Include="value.cpp" />
+    <ClCompile Include="linker.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="chunk.h" />
@@ -14,5 +15,6 @@
     <ClInclude Include="vm.h" />
     <ClInclude Include="scanner.h" />
     <ClInclude Include="compiler.h" />
+    <ClInclude Include="linker.h" />
   </ItemGroup>
 </Project>

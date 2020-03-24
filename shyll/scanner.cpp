@@ -26,7 +26,7 @@ Token Scanner::ScanToken()
 	switch (c)
 	{
 	case '-':
-		if (Match('>')) { return MakeToken(Token::Type::Store); }
+		if (Match('>')) { return MakeToken(Token::Type::Load); }
 		if (Match('-')) { return MakeToken(Token::Type::Delete); }
 		break;
 
@@ -35,14 +35,11 @@ Token Scanner::ScanToken()
 		break;
 
 	case '<':
-		if (Match('-')) { return MakeToken(Token::Type::Load); }
+		if (Match('-')) { return MakeToken(Token::Type::Store); }
 		break;
 
 	case ':':
 		return MakeToken(Token::Type::FunctionHeader);
-
-	case ';':
-		return MakeToken(Token::Type::FunctionFooter);
 
 	case '@':
 		return MakeToken(Token::Type::FunctionCall);
