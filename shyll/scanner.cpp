@@ -257,7 +257,25 @@ Token::Type Scanner::IdentifierType() const
 	case 'o':
 		return CheckKeyword("or", Token::Type::LogicalOr);
 	case 'p':
-		return CheckKeyword("pop", Token::Type::Pop);
+		if (current - start > 0)
+		{
+			switch (source[start + 1])
+			{
+			case 'o':
+				return CheckKeyword("pop", Token::Type::Pop);
+
+			case 'r':
+				if (CheckKeyword("println", Token::Type::PrintLn) == Token::Type::PrintLn)
+				{
+					return Token::Type::PrintLn;
+				}
+				else
+				{
+					return CheckKeyword("print", Token::Type::Print);
+				}
+			}
+		}
+		break;
 	case 's':
 		if (current - start > 0)
 		{

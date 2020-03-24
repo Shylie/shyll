@@ -31,14 +31,14 @@ InterpretResult VM::Interpret(const std::string& source)
 
 		instruction = chunk.Read(ip);
 #ifdef _DEBUG
-		std::cout << "          ";
+		std::cerr << "          ";
 		for (Value* slot = stack; slot < stackTop; slot++)
 		{
-			std::cout << "[ " << *slot << " ]";
+			std::cerr << "[ " << *slot << " ]";
 		}
-		std::cout << '\n';
+		std::cerr << '\n';
 		chunk.DisassembleInstruction(ip, 0);
-		std::cout << '\n';
+		std::cerr << '\n';
 #endif
 		ip++;
 		switch (static_cast<OpCode>(instruction))
@@ -272,6 +272,23 @@ do \
 			break;
 
 #undef BINARY_OP
+
+		case OpCode::Print:
+			if (stackTop - stack < 1)
+			{
+				error = "No value on the stack to print"s;
+				return InterpretResult::RuntimeError;
+			}
+			std::cout << stackTop[-1];
+			break;
+
+		case OpCode::PrintLn:
+			if (stackTop - stack >= 1)
+			{
+				std::cout << stackTop[-1];
+			}
+			std::cout << '\n';
+			break;
 
 		case OpCode::Trace:
 			if (stackTop - stack < 1)

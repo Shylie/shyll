@@ -23,6 +23,8 @@ enum class OpCode : uint8_t
 	LogicalOr,
 	Duplicate,
 	Pop,
+	Print,
+	PrintLn,
 	Trace,
 	ShowTraceLog,
 	ClearTraceLog,

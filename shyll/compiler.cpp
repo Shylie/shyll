@@ -150,6 +150,16 @@ bool Compiler::Instruction()
 		currentToken++;
 		break;
 
+	case Token::Type::Print:
+		EmitByte(OpCode::Print);
+		currentToken++;
+		break;
+
+	case Token::Type::PrintLn:
+		EmitByte(OpCode::PrintLn);
+		currentToken++;
+		break;
+
 	case Token::Type::Trace:
 		EmitByte(OpCode::Trace);
 		currentToken++;
@@ -174,9 +184,9 @@ bool Compiler::Instruction()
 			{
 			case Token::Type::Create:
 			{
-				if (PreviousToken()->HadWhitespace)
+				if (CurrentToken()->HadWhitespace)
 				{
-					ErrorAt(*TokenRelative(-2), "Invalid trailing whitespace");
+					ErrorAt(*PreviousToken(), "Invalid trailing whitespace");
 					break;
 				}
 				else
@@ -193,7 +203,7 @@ bool Compiler::Instruction()
 						EmitConstant(variable.Lexeme, OpCode::Load, OpCode::LoadLong);
 						EmitByte(OpCode::GreaterThan);
 						uint16_t endLoopOffset = EmitJump(OpCode::JumpIfFalse);
-						currentToken++;
+						currentToken += 2;
 						while (CurrentToken() && CurrentToken()->TokenType != Token::Type::Loop)
 						{
 							if (CurrentToken()->TokenType == Token::Type::End)
@@ -216,47 +226,50 @@ bool Compiler::Instruction()
 						PatchJump(EmitJump(OpCode::Jump), beginLoopOffset);
 						PatchJump(endLoopOffset);
 						EmitConstant("!" + variable.Lexeme, OpCode::Del, OpCode::DelLong);
+						currentToken++;
+						break;
 					}
 					else
 					{
+						currentToken++;
 						break;
 					}
 				}
 			}
 
 			case Token::Type::Delete:
-				currentToken++;
 				if (CurrentToken()->HadWhitespace)
 				{
 					ErrorAt(*PreviousToken(), "Invalid trailing whitespace");
 				}
 				else
 				{
-					EmitConstant(CurrentToken()->Lexeme, OpCode::Del, OpCode::DelLong);
+					EmitConstant(PreviousToken()->Lexeme, OpCode::Del, OpCode::DelLong);
+					currentToken++;
 				}
 				break;
 
 			case Token::Type::Load:
-				currentToken++;
 				if (CurrentToken()->HadWhitespace)
 				{
 					ErrorAt(*PreviousToken(), "Invalid trailing whitespace");
 				}
 				else
 				{
-					EmitConstant(CurrentToken()->Lexeme, OpCode::Load, OpCode::LoadLong);
+					EmitConstant(PreviousToken()->Lexeme, OpCode::Load, OpCode::LoadLong);
+					currentToken++;
 				}
 				break;
 
 			case Token::Type::Store:
-				currentToken++;
 				if (CurrentToken()->HadWhitespace)
 				{
 					ErrorAt(*PreviousToken(), "Invalid trailing whitespace");
 				}
 				else
 				{
-					EmitConstant(CurrentToken()->Lexeme, OpCode::Store, OpCode::StoreLong);
+					EmitConstant(PreviousToken()->Lexeme, OpCode::Store, OpCode::StoreLong);
+					currentToken++;
 				}
 				break;
 
@@ -360,10 +373,13 @@ bool Compiler::Instruction()
 		}
 		return false;
 
+	case Token::Type::Error:
+		ErrorAt(*CurrentToken(), CurrentToken()->Lexeme);
+		currentToken++;
+		break;
+
 	default:
-#ifdef _DEBUG
-		if (CurrentToken()) { WarnAt(*CurrentToken(), "Invalid token"); }
-#endif
+		if (CurrentToken()) { ErrorAt(*CurrentToken(), "Invalid token"); }
 		currentToken++;
 		return false;
 	}
@@ -425,13 +441,13 @@ void Compiler::EndSymbol()
 	}
 #ifdef _DEBUG
 	CurrentChunk()->Disassemble(currentSymbol);
-	std::cout << '\n';
+	std::cerr << '\n';
 #endif
 }
 
 void Compiler::WarnAt(const Token& token, const std::string& message)
 {
-	std::cout << "[Line " << token.Line << "] Error";
+	std::cerr << "[Line " << token.Line << "] Error";
 
 	switch (token.TokenType)
 	{
@@ -440,10 +456,10 @@ void Compiler::WarnAt(const Token& token, const std::string& message)
 		break;
 
 	default:
-		std::cout << " at '" << token.Lexeme << '\'';
+		std::cerr << " at '" << token.Lexeme << '\'';
 	}
 
-	std::cout << ": " << message << '\n';
+	std::cerr << ": " << message << '\n';
 }
 
 void Compiler::ErrorAt(const Token& token, const std::string& message)

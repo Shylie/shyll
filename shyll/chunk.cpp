@@ -163,7 +163,7 @@ int Chunk::ReadLine(size_t offset) const
 
 void Chunk::Disassemble(const std::string& name) const
 {
-	std::cout << "== " << name << " ==\n";
+	std::cerr << "== " << name << " ==\n";
 
 	size_t oldOffset = 0;
 	size_t newOffset = 0;
@@ -179,14 +179,14 @@ void Chunk::Disassemble(const std::string& name) const
 
 size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 {
-	std::cout << std::setfill('0') << std::setw(4) << std::right << offset << ' ';
+	std::cerr << std::setfill('0') << std::setw(4) << std::right << offset << ' ';
 	if (dif > 0 && offset > 0 && ReadLine(offset - dif) == ReadLine(offset))
 	{
-		std::cout << ("   | ");
+		std::cerr << ("   | ");
 	}
 	else
 	{
-		std::cout << std::setfill(' ') << std::setw(4) << std::right << ReadLine(offset) << ' ';
+		std::cerr << std::setfill(' ') << std::setw(4) << std::right << ReadLine(offset) << ' ';
 	}
 
 	uint8_t instruction = instructions[offset];
@@ -267,6 +267,12 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 	case OpCode::Pop:
 		return SimpleInstruction("OP_POP", offset);
 
+	case OpCode::Print:
+		return SimpleInstruction("OP_PRINT", offset);
+
+	case OpCode::PrintLn:
+		return SimpleInstruction("OP_PRINT_LN", offset);
+
 	case OpCode::Trace:
 		return SimpleInstruction("OP_TRACE", offset);
 
@@ -289,7 +295,7 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 		return SimpleInstruction("OP_PUSH_JUMP_ADDRESS", offset);
 
 	default:
-		std::cout << "Unknown opcode " << instruction << '\n';
+		std::cerr << "Unknown opcode " << instruction << '\n';
 		return offset + 1;
 	}
 }
@@ -313,27 +319,27 @@ void Chunk::WriteLine(int line)
 
 size_t Chunk::SimpleInstruction(const std::string& name, size_t offset) const
 {
-	std::cout << std::setfill(' ') << std::left << std::setw(16) << name << '\n';
+	std::cerr << std::setfill(' ') << std::left << std::setw(16) << name << '\n';
 	return offset + 1;
 }
 
 size_t Chunk::ConstantInstruction(const std::string& name, size_t offset) const
 {
 	uint8_t constant = instructions[offset + 1];
-	std::cout << std::setfill(' ') << std::left << std::setw(16) << name << std::right << std::setw(6) << static_cast<uint16_t>(constant) << " '" << values[constant] << "'\n";
+	std::cerr << std::setfill(' ') << std::left << std::setw(16) << name << std::right << std::setw(6) << static_cast<uint16_t>(constant) << " '" << values[constant] << "'\n";
 	return offset + 2;
 }
 
 size_t Chunk::ConstantInstructionLong(const std::string& name, size_t offset) const
 {
 	uint16_t constant = ReadLong(offset + 1);
-	std::cout << std::setfill(' ') << std::left << std::setw(16) << name << std::right << std::setw(6) << constant << " '" << values[constant] << "'\n";
+	std::cerr << std::setfill(' ') << std::left << std::setw(16) << name << std::right << std::setw(6) << constant << " '" << values[constant] << "'\n";
 	return offset + 3;
 }
 
 size_t Chunk::JumpInstruction(const std::string& name, size_t offset) const
 {
 	uint16_t ip = offset + 3 + static_cast<int16_t>(ReadLong(offset + 1));
-	std::cout << std::setfill(' ') << std::left << std::setw(16) << name << "  " << std::right << std::setfill('0') << std::setw(4) << ip << '\n';
+	std::cerr << std::setfill(' ') << std::left << std::setw(16) << name << "  " << std::right << std::setfill('0') << std::setw(4) << ip << '\n';
 	return offset + 3;
 }
