@@ -28,6 +28,21 @@ Token Scanner::ScanToken()
 	case '-':
 		if (Match('>')) { return MakeToken(Token::Type::Load); }
 		if (Match('-')) { return MakeToken(Token::Type::Delete); }
+		if (IsDigit(Peek()))
+		{
+			while (IsDigit(Peek())) { Advance(); }
+
+			if (Peek() == '.' && IsDigit(Peek(1)))
+			{
+				Advance();
+
+				while (IsDigit(Peek())) { Advance(); }
+
+				return MakeToken(Token::Type::Double);
+			}
+
+			return MakeToken(Token::Type::Long);
+		}
 		break;
 
 	case '+':

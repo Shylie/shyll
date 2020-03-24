@@ -364,6 +364,7 @@ bool Compiler::Instruction()
 #ifdef _DEBUG
 		if (CurrentToken()) { WarnAt(*CurrentToken(), "Invalid token"); }
 #endif
+		currentToken++;
 		return false;
 	}
 	return true;
