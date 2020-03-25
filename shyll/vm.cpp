@@ -115,7 +115,7 @@ InterpretResult VM::Interpret(const std::string& source)
 			{
 				if (!Push(Value(globals[loc])))
 				{
-					error = "Not enough values on stack to store into variable '" + loc + '\'';
+					error = "shit"s;
 					return InterpretResult::RuntimeError;
 				}
 			}
