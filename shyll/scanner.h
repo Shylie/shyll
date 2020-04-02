@@ -14,6 +14,10 @@ public:
 		False,
 		Identifier,
 
+		AsLong,
+		AsDouble,
+		AsString,
+
 		Store,
 		Load,
 		Delete,
@@ -33,6 +37,7 @@ public:
 		NotEqual,
 		LogicalAnd,
 		LogicalOr,
+		LogicalNot,
 
 		Duplicate,
 		Pop,
@@ -41,6 +46,7 @@ public:
 		Else,
 		EndIf,
 		Do,
+		While,
 		Loop,
 
 		Print,

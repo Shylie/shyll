@@ -14,8 +14,7 @@ int main(int argc, char** argv)
 		{
 			std::stringstream out;
 			out << file.rdbuf();
-
-			VM* vm = new VM();
+			VM* vm = new VM(argv[1]);
 
 			std::cerr << '\n';
 
@@ -72,7 +71,7 @@ int main(int argc, char** argv)
 					}
 				}
 				std::cerr << " | ";
-				code += ' ' + line;
+				code += line + '\n';
 			}
 
 			std::cerr << '\n';

@@ -1,3 +1,5 @@
+#include <iostream>
+
 #include "scanner.h"
 
 Token::Token() : TokenType(Type::Error), Lexeme(""), Line(1), HadWhitespace(false)
@@ -26,8 +28,7 @@ Token Scanner::ScanToken()
 	switch (c)
 	{
 	case '-':
-		if (Match('>')) { return MakeToken(Token::Type::Load); }
-		if (Match('-')) { return MakeToken(Token::Type::Delete); }
+		if (Match('>')) { return MakeToken(Token::Type::Store); }
 		if (IsDigit(Peek()))
 		{
 			while (IsDigit(Peek())) { Advance(); }
@@ -45,12 +46,16 @@ Token Scanner::ScanToken()
 		}
 		break;
 
-	case '+':
-		if (Match('+')) { return MakeToken(Token::Type::Create); }
+	case '.':
+		if (Match('.')) { return MakeToken(Token::Type::Create); }
+		break;
+
+	case '~':
+		if (Match('~')) { return MakeToken(Token::Type::Delete); }
 		break;
 
 	case '<':
-		if (Match('-')) { return MakeToken(Token::Type::Store); }
+		if (Match('-')) { return MakeToken(Token::Type::Load); }
 		break;
 
 	case ':':
@@ -155,6 +160,7 @@ void Scanner::SkipWhitespace()
 		case '#':
 			hadWhitespace = true;
 			while (Peek() != '\n' && !IsAtEnd()) { Advance(); }
+			break;
 
 		default:
 			return;
@@ -175,11 +181,29 @@ Token::Type Scanner::IdentifierType() const
 				return CheckKeyword("add", Token::Type::Add);
 			case 'n':
 				return CheckKeyword("and", Token::Type::LogicalAnd);
+			case 's':
+				if (current - start > 1)
+				{
+					switch (source[start + 2])
+					{
+					case 'd':
+						return CheckKeyword("asdouble", Token::Type::AsDouble);
+
+					case 'l':
+						return CheckKeyword("aslong", Token::Type::AsLong);
+
+					case 's':
+						return CheckKeyword("asstring", Token::Type::AsString);
+					}
+				}
+				break;
 			}
 		}
 		break;
+
 	case 'c':
 		return CheckKeyword("cleartracelog", Token::Type::ClearTraceLog);
+
 	case 'd':
 		if (current - start > 0)
 		{
@@ -187,13 +211,16 @@ Token::Type Scanner::IdentifierType() const
 			{
 			case 'i':
 				return CheckKeyword("div", Token::Type::Divide);
+
 			case 'o':
 				return CheckKeyword("do", Token::Type::Do);
+
 			case 'u':
 				return CheckKeyword("dup", Token::Type::Duplicate);
 			}
 		}
 		break;
+
 	case 'e':
 		if (current - start > 0)
 		{
@@ -201,15 +228,19 @@ Token::Type Scanner::IdentifierType() const
 			{
 			case 'l':
 				return CheckKeyword("else", Token::Type::Else);
+
 			case 'n':
 				return CheckKeyword("endif", Token::Type::EndIf);
+
 			case 'q':
 				return CheckKeyword("eq", Token::Type::Equal);
 			}
 		}
 		break;
+
 	case 'f':
 		return CheckKeyword("false", Token::Type::False);
+
 	case 'g':
 		if (current - start > 0)
 		{
@@ -228,8 +259,10 @@ Token::Type Scanner::IdentifierType() const
 			}
 		}
 		break;
+
 	case 'i':
 		return CheckKeyword("if", Token::Type::If);
+
 	case 'l':
 		if (current - start > 0)
 		{
@@ -237,6 +270,7 @@ Token::Type Scanner::IdentifierType() const
 			{
 			case 'o':
 				return CheckKeyword("loop", Token::Type::Loop);
+
 			case 't':
 				if (current - start > 1)
 				{
@@ -250,12 +284,27 @@ Token::Type Scanner::IdentifierType() const
 			}
 		}
 		break;
+
 	case 'm':
 		return CheckKeyword("mul", Token::Type::Multiply);
+
 	case 'n':
-		return CheckKeyword("neq", Token::Type::NotEqual);
+		if (current - start > 0)
+		{
+			switch (source[start + 1])
+			{
+			case 'e':
+				return CheckKeyword("neq", Token::Type::NotEqual);
+
+			case 'o':
+				return CheckKeyword("not", Token::Type::LogicalNot);
+			}
+		}
+		break;
+
 	case 'o':
 		return CheckKeyword("or", Token::Type::LogicalOr);
+
 	case 'p':
 		if (current - start > 0)
 		{
@@ -276,18 +325,22 @@ Token::Type Scanner::IdentifierType() const
 			}
 		}
 		break;
+
 	case 's':
 		if (current - start > 0)
 		{
 			switch (source[start + 1])
 			{
+
 			case 'h':
 				return CheckKeyword("showtracelog", Token::Type::ShowTraceLog);
+
 			case 'u':
 				return CheckKeyword("sub", Token::Type::Subtract);
 			}
 		}
 		break;
+
 	case 't':
 		if (current - start > 0)
 		{
@@ -304,9 +357,13 @@ Token::Type Scanner::IdentifierType() const
 						return CheckKeyword("true", Token::Type::True);
 					}
 				}
+				break;
 			}
 		}
 		break;
+
+	case 'w':
+		return CheckKeyword("while", Token::Type::While);
 	}
 
 	return Token::Type::Identifier;

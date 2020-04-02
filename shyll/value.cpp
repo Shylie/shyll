@@ -179,6 +179,12 @@ const Value Value::operator||(const Value& val) const
 	return Value();
 }
 
+const Value Value::operator!() const
+{
+	if (Get<bool>()) { return !*Get<bool>(); }
+	return Value();
+}
+
 std::ostream& operator<<(std::ostream& stream, const Value& value)
 {
 	if (value.internal.has_value())

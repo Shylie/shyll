@@ -44,6 +44,8 @@ public:
 	const Value operator&&(const Value& val) const;
 	const Value operator||(const Value& val) const;
 
+	const Value operator!() const;
+
 private:
 	typedef std::variant<double, std::string, bool, long> ValueVariant;
 

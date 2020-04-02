@@ -3,7 +3,23 @@
 #include "vm.h"
 #include "linker.h"
 
-VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error("")
+#ifndef EXCLUDE_RAYLIB
+#include "raylib.h"
+#endif
+
+#ifndef EXCLUDE_RAYLIB
+VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), windowActive(false), isDrawing(false), filename("")
+#else
+VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), filename("")
+#endif
+{
+}
+
+#ifndef EXCLUDE_RAYLIB
+VM::VM(const std::string& filename) : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), windowActive(false), isDrawing(false), filename(filename)
+#else
+VM::VM(const std::string& filename) : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), filename(filename)
+#endif
 {
 }
 
@@ -24,14 +40,21 @@ InterpretResult VM::Interpret(const std::string& source)
 
 	if (!Linker(source).Link(chunk)) { return InterpretResult::CompileError; }
 
+#ifndef EXCLUDE_RAYLIB
+	SetTraceLogLevel(LOG_NONE);
+#endif
+
 	uint8_t instruction;
 	for (;;)
 	{
-		if (ip >= chunk.Size()) { return InterpretResult::RuntimeError; }
+		if (ip >= chunk.Size())
+		{
+			return InterpretResult::RuntimeError;
+		}
 
 		instruction = chunk.Read(ip);
 #ifdef _DEBUG
-		std::cerr << "          ";
+		std::cerr << "\n          ";
 		for (Value* slot = stack; slot < stackTop; slot++)
 		{
 			std::cerr << "[ " << *slot << " ]";
@@ -44,7 +67,76 @@ InterpretResult VM::Interpret(const std::string& source)
 		switch (static_cast<OpCode>(instruction))
 		{
 		case OpCode::Return:
+#ifndef EXCLUDE_RAYLIB
+			if (windowActive)
+			{
+				CloseWindow();
+			}
+#endif
 			return InterpretResult::Ok;
+
+		case OpCode::None:
+			break;
+
+		case OpCode::AsDouble:
+		{
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to convert to double"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<double>())
+			{
+				Value val = Pop();
+				if (val.Get<long>())
+				{
+					Push(static_cast<double>(*val.Get<long>()));
+				}
+				else
+				{
+					error = "Invalid conversion to double"s;
+					return InterpretResult::RuntimeError;
+				}
+			}
+			break;
+		}
+
+		case OpCode::AsLong:
+		{
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to convert to long"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				Value val = Pop();
+				if (val.Get<double>())
+				{
+					Push(static_cast<long>(*val.Get<double>()));
+				}
+				else
+				{
+					error = "Invalid conversion to long"s;
+					return InterpretResult::RuntimeError;
+				}
+			}
+			break;
+		}
+
+		case OpCode::AsString:
+		{
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to convert to double"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<std::string>())
+			{
+				Push(Pop() + Value(""s));
+			}
+			break;
+		}
 
 		case OpCode::Constant:
 		{
@@ -115,7 +207,7 @@ InterpretResult VM::Interpret(const std::string& source)
 			{
 				if (!Push(Value(globals[loc])))
 				{
-					error = "shit"s;
+					error = "Invalid value in variable '" + loc + '\'';
 					return InterpretResult::RuntimeError;
 				}
 			}
@@ -134,7 +226,7 @@ InterpretResult VM::Interpret(const std::string& source)
 			{
 				if (!Push(Value(globals[loc])))
 				{
-					error = "shit"s;
+					error = "Invalid value in variable '" + loc + '\'';
 					return InterpretResult::RuntimeError;
 				}
 			}
@@ -185,6 +277,15 @@ InterpretResult VM::Interpret(const std::string& source)
 			}
 			break;
 		}
+
+		case OpCode::LogicalNot:
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to logically negate"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(!Pop());
+			break;
 
 		case OpCode::Duplicate:
 			if (stackTop - stack < 1)
@@ -283,11 +384,12 @@ do \
 			break;
 
 		case OpCode::PrintLn:
-			if (stackTop - stack >= 1)
+			if (stackTop - stack < 1)
 			{
-				std::cout << stackTop[-1];
+				error = "No value on the stack to println"s;
+				return InterpretResult::RuntimeError;
 			}
-			std::cout << '\n';
+			std::cout << stackTop[-1] << '\n';
 			break;
 
 		case OpCode::Trace:
@@ -349,13 +451,739 @@ do \
 		case OpCode::PushJumpAddress:
 			callStack.push_back(ip + 3);
 			break;
+
+#ifndef EXCLUDE_RAYLIB
+		case OpCode::InitWindow:
+		{
+			if (stackTop - stack < 3)
+			{
+				error = "Not enough values on the stack to init window"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<std::string>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>())
+			{
+				error = "Invalid arguments for init window"s;
+				return InterpretResult::RuntimeError;
+			}
+			std::string title = *Pop().Get<std::string>();
+			long height = *Pop().Get<long>();
+			long width = *Pop().Get<long>();
+			InitWindow(width, height, title.c_str());
+			windowActive = true;
+			break;
+		}
+
+		case OpCode::WindowShouldClose:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(WindowShouldClose());
+			break;
+
+		case OpCode::CloseWindow:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			CloseWindow();
+			windowActive = false;
+			break;
+
+		case OpCode::ShowCursor:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			ShowCursor();
+			break;
+
+		case OpCode::HideCursor:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			HideCursor();
+			break;
+
+		case OpCode::ClearBackground:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 4)
+			{
+				error = "Not enough values on stack to clear background"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>())
+			{
+				error = "Invalid arguments for clear background"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			ClearBackground(Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::BeginDrawing:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (isDrawing)
+			{
+				error = "Already drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			BeginDrawing();
+			isDrawing = true;
+			break;
+
+		case OpCode::EndDrawing:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			EndDrawing();
+			isDrawing = false;
+			break;
+
+		case OpCode::SetTargetFPS:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to set target fps"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for set target fps"s;
+				return InterpretResult::RuntimeError;
+			}
+			SetTargetFPS(*Pop().Get<long>());
+			break;
+
+		case OpCode::GetTime:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(GetTime());
+			break;
+
+		case OpCode::GetRandomValue:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 2)
+			{
+				error = "Not enough values on stack to get random value"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>())
+			{
+				error = "Invalid arguments for get random value"s;
+				return InterpretResult::RuntimeError;
+			}
+			long max = *Pop().Get<long>();
+			long min = *Pop().Get<long>();
+			Push(static_cast<long>(GetRandomValue(min, max)));
+			break;
+		}
+
+		case OpCode::IsKeyPressed:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if key is pressed"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is key pressed"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsKeyPressed(*Pop().Get<long>()));
+			break;
+
+		case OpCode::IsKeyDown:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if key is down"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is key down"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsKeyDown(*Pop().Get<long>()));
+			break;
+
+		case OpCode::IsKeyReleased:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if key is released"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is key released"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsKeyReleased(*Pop().Get<long>()));
+			break;
+
+		case OpCode::IsKeyUp:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if key is up"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is key up"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsKeyUp(*Pop().Get<long>()));
+			break;
+
+		case OpCode::GetKeyPressed:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(static_cast<long>(GetKeyPressed()));
+			break;
+
+		case OpCode::SetExitKey:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to set as exit key"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for set exit key"s;
+				return InterpretResult::RuntimeError;
+			}
+			SetExitKey(*Pop().Get<long>());
+			break;
+
+		case OpCode::IsMouseButtonPressed:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if mouse button is pressed"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is mouse button pressed"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsMouseButtonPressed(*Pop().Get<long>()));
+			break;
+
+		case OpCode::IsMouseButtonDown:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if mouse button is down"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is mouse button down"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsMouseButtonDown(*Pop().Get<long>()));
+			break;
+
+		case OpCode::IsMouseButtonReleased:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if mouse button is released"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is mouse button released"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsMouseButtonReleased(*Pop().Get<long>()));
+			break;
+
+		case OpCode::IsMouseButtonUp:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to check if mouse button is up"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>())
+			{
+				error = "Invalid arguments for is mouse button up"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(IsMouseButtonUp(*Pop().Get<long>()));
+			break;
+
+		case OpCode::GetMouseX:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(static_cast<long>(GetMouseX()));
+			break;
+
+		case OpCode::GetMouseY:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(static_cast<long>(GetMouseY()));
+			break;
+
+		case OpCode::GetMousePosition:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(static_cast<long>(GetMouseX()));
+			Push(static_cast<long>(GetMouseY()));
+			break;
+
+		case OpCode::SetMousePosition:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 2)
+			{
+				error = "Not enough values on stack to set mouse position"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>())
+			{
+				error = "Invalid arguments for set mouse position"s;
+				return InterpretResult::RuntimeError;
+			}
+			long x = *Pop().Get<long>();
+			long y = *Pop().Get<long>();
+			SetMousePosition(x, y);
+			break;
+		}
+
+		case OpCode::SetMouseOffset:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 2)
+			{
+				error = "Not enough values on stack to set mouse offset"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>())
+			{
+				error = "Invalid arguments for set mouse offset"s;
+				return InterpretResult::RuntimeError;
+			}
+			long x = *Pop().Get<long>();
+			long y = *Pop().Get<long>();
+			SetMouseOffset(x, y);
+			break;
+		}
+
+		case OpCode::SetMouseScale:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 2)
+			{
+				error = "Not enough values on stack to set mouse scale"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<double>() || !stackTop[-2].Get<double>())
+			{
+				error = "Invalid arguments for set mouse scale"s;
+				return InterpretResult::RuntimeError;
+			}
+			double x = *Pop().Get<double>();
+			double y = *Pop().Get<double>();
+			SetMouseScale(x, y);
+			break;
+		}
+
+		case OpCode::GetMouseWheelMove:
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(static_cast<long>(GetMouseWheelMove()));
+			break;
+
+		case OpCode::DrawPixel:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 6)
+			{
+				error = "Not enough values on stack to draw pixel"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<long>() || !stackTop[-6].Get<long>())
+			{
+				error = "Invalid arguments for draw pixel"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawPixel(x, y, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawLine:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 9)
+			{
+				error = "Not enough values on stack to draw line"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<double>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>() || !stackTop[-9].Get<long>())
+			{
+				error = "Invalid arguments for draw line"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			double thick = *Pop().Get<double>();
+			long y2 = *Pop().Get<long>();
+			long x2 = *Pop().Get<long>();
+			long y1 = *Pop().Get<long>();
+			long x1 = *Pop().Get<long>();
+			DrawLineEx(Vector2{ static_cast<float>(x1), static_cast<float>(y1) }, Vector2{ static_cast<float>(x2), static_cast<float>(y2) }, thick, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawCircle:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 7)
+			{
+				error = "Not enough values on stack to draw circle"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<double>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>())
+			{
+				error = "Invalid arguments for draw circle"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			double rad = *Pop().Get<double>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawCircle(x, y, rad, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawCircleLines:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 7)
+			{
+				error = "Not enough values on stack to draw circle lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<double>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>())
+			{
+				error = "Invalid arguments for draw circle lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			double rad = *Pop().Get<double>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawCircleLines(x, y, rad, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawEllipse:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 8)
+			{
+				error = "Not enough values on stack to draw ellipse"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<double>() || !stackTop[-6].Get<double>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>())
+			{
+				error = "Invalid arguments for draw ellipse"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			double radY = *Pop().Get<double>();
+			double radX = *Pop().Get<double>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawEllipse(x, y, radY, radX, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawEllipseLines:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 8)
+			{
+				error = "Not enough values on stack to draw ellipse lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<double>() || !stackTop[-6].Get<double>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>())
+			{
+				error = "Invalid arguments for draw ellipse lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			double radY = *Pop().Get<double>();
+			double radX = *Pop().Get<double>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawEllipseLines(x, y, radY, radX, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawRectangle:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 8)
+			{
+				error = "Not enough values on stack to draw rectangle"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<long>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>())
+			{
+				error = "Invalid arguments for draw rectangle"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			long h = *Pop().Get<long>();
+			long w = *Pop().Get<long>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawRectangle(x, y, w, h, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawRectangleLines:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 8)
+			{
+				error = "Not enough values on stack to draw rectangle lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<long>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>())
+			{
+				error = "Invalid arguments for draw rectangle lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			long h = *Pop().Get<long>();
+			long w = *Pop().Get<long>();
+			long y = *Pop().Get<long>();
+			long x = *Pop().Get<long>();
+			DrawRectangleLines(x, y, w, h, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+#endif
 		}
 	}
 }
 
-const std::string& VM::ErrorMessage() const
+std::string VM::ErrorMessage() const
 {
-	return *error.Get<std::string>();
+	using namespace std::string_literals;
+	return "[Line "s + std::to_string(chunk.ReadLine(ip)) + "] "s + *error.Get<std::string>();
 }
 
 bool VM::Push(const Value& value)

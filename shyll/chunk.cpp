@@ -195,6 +195,18 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 	case OpCode::Return:
 		return SimpleInstruction("OP_RETURN", offset);
 
+	case OpCode::None:
+		return SimpleInstruction("OP_NONE", offset);
+
+	case OpCode::AsDouble:
+		return SimpleInstruction("OP_AS_DOUBLE", offset);
+
+	case OpCode::AsLong:
+		return SimpleInstruction("OP_AS_LONG", offset);
+
+	case OpCode::AsString:
+		return SimpleInstruction("OP_AS_STRING", offset);
+
 	case OpCode::Constant:
 		return ConstantInstruction("OP_CONSTANT", offset);
 
@@ -261,6 +273,9 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 	case OpCode::LogicalOr:
 		return SimpleInstruction("OP_LOGICAL_OR", offset);
 
+	case OpCode::LogicalNot:
+		return SimpleInstruction("OP_LOGICAL_NOT", offset);
+
 	case OpCode::Duplicate:
 		return SimpleInstruction("OP_DUPLICATE", offset);
 
@@ -293,6 +308,200 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 
 	case OpCode::PushJumpAddress:
 		return SimpleInstruction("OP_PUSH_JUMP_ADDRESS", offset);
+
+#pragma region RAYLIB OPCODES
+#pragma region CORE MODULE
+	case OpCode::InitWindow:
+		return SimpleInstruction("OP_INIT_WINDOW", offset);
+
+	case OpCode::WindowShouldClose:
+		return SimpleInstruction("OP_WINDOW_SHOULD_CLOSE", offset);
+
+	case OpCode::CloseWindow:
+		return SimpleInstruction("OP_CLOSE_WINDOW", offset);
+
+	case OpCode::ShowCursor:
+		return SimpleInstruction("OP_SHOW_CURSOR", offset);
+
+	case OpCode::HideCursor:
+		return SimpleInstruction("OP_HIDE_CURSOR", offset);
+
+	case OpCode::ClearBackground:
+		return SimpleInstruction("OP_CLEAR_BACKGROUND", offset);
+
+	case OpCode::BeginDrawing:
+		return SimpleInstruction("OP_BEGIN_DRAWING", offset);
+
+	case OpCode::EndDrawing:
+		return SimpleInstruction("OP_END_DRAWING", offset);
+
+	case OpCode::SetTargetFPS:
+		return SimpleInstruction("OP_SET_TARGET_FPS", offset);
+
+	case OpCode::GetTime:
+		return SimpleInstruction("OP_GET_TIME", offset);
+
+	case OpCode::GetRandomValue:
+		return SimpleInstruction("OP_GET_RANDOM_VALUE", offset);
+
+	case OpCode::LoadStorageValue:
+		return SimpleInstruction("OP_LOAD_STORAGE_VALUE", offset);
+
+	case OpCode::SaveStorageValue:
+		return SimpleInstruction("OP_SAVE_STORAGE_VALUE", offset);
+
+	case OpCode::IsKeyPressed:
+		return SimpleInstruction("OP_IS_KEY_PRESSED", offset);
+
+	case OpCode::IsKeyDown:
+		return SimpleInstruction("OP_IS_KEY_DOWN", offset);
+
+	case OpCode::IsKeyReleased:
+		return SimpleInstruction("OP_IS_KEY_RELEASED", offset);
+
+	case OpCode::IsKeyUp:
+		return SimpleInstruction("OP_IS_KEY_UP", offset);
+
+	case OpCode::GetKeyPressed:
+		return SimpleInstruction("OP_GET_KEY_PRESSED", offset);
+
+	case OpCode::SetExitKey:
+		return SimpleInstruction("OP_SET_EXIT_KEY", offset);
+
+	case OpCode::IsMouseButtonPressed:
+		return SimpleInstruction("OP_IS_MOUSE_BUTTON_PRESSED", offset);
+
+	case OpCode::IsMouseButtonDown:
+		return SimpleInstruction("OP_IS_MOUSE_BUTTON_DOWN", offset);
+
+	case OpCode::IsMouseButtonReleased:
+		return SimpleInstruction("OP_IS_MOUSE_BUTTON_RELEASED", offset);
+
+	case OpCode::IsMouseButtonUp:
+		return SimpleInstruction("OP_IS_MOUSE_BUTTON_UP", offset);
+
+	case OpCode::GetMouseX:
+		return SimpleInstruction("OP_GET_MOUSE_X", offset);
+
+	case OpCode::GetMouseY:
+		return SimpleInstruction("OP_GET_MOUSE_Y", offset);
+
+	case OpCode::GetMousePosition:
+		return SimpleInstruction("OP_GET_MOUSE_POSITION", offset);
+
+	case OpCode::SetMousePosition:
+		return SimpleInstruction("OP_SET_MOUSE_POSITION", offset);
+
+	case OpCode::SetMouseOffset:
+		return SimpleInstruction("OP_SET_MOUSE_OFFSET", offset);
+
+	case OpCode::SetMouseScale:
+		return SimpleInstruction("OP_SET_MOUSE_SCALE", offset);
+
+	case OpCode::GetMouseWheelMove:
+		return SimpleInstruction("OP_GET_MOUSE_WHEEL_MOVE", offset);
+#pragma endregion
+
+#pragma region SHAPES MODULE
+	case OpCode::DrawPixel:
+		return SimpleInstruction("OP_DRAW_PIXEL", offset);
+
+	case OpCode::DrawLine:
+		return SimpleInstruction("OP_DRAW_LINE", offset);
+
+	case OpCode::DrawLineStrip:
+		return SimpleInstruction("OP_DRAW_LINE_STRIP", offset);
+
+	case OpCode::DrawCircle:
+		return SimpleInstruction("OP_DRAW_CIRCLE", offset);
+
+	case OpCode::DrawCircleSector:
+		return SimpleInstruction("OP_DRAW_CIRCLE_SECTOR", offset);
+
+	case OpCode::DrawCircleSectorLines:
+		return SimpleInstruction("OP_DRAW_CIRCLE_SECTOR_LINES", offset);
+
+	case OpCode::DrawCircleGradient:
+		return SimpleInstruction("OP_DRAW_CIRCLE_GRADIENT", offset);
+
+	case OpCode::DrawCircleLines:
+		return SimpleInstruction("OP_DRAW_CIRCLE_LINES", offset);
+
+	case OpCode::DrawEllipse:
+		return SimpleInstruction("OP_DRAW_ELLIPSE", offset);
+
+	case OpCode::DrawEllipseLines:
+		return SimpleInstruction("OP_DRAW_ELLIPSE_LINES", offset);
+
+	case OpCode::DrawRing:
+		return SimpleInstruction("OP_DRAW_RING", offset);
+
+	case OpCode::DrawRectangle:
+		return SimpleInstruction("OP_DRAW_RECTANGLE", offset);
+
+	case OpCode::DrawRectangleGradient:
+		return SimpleInstruction("OP_DRAW_RECTANGLE_GRADIENT", offset);
+
+	case OpCode::DrawRectangleLines:
+		return SimpleInstruction("OP_DRAW_RECTANGLE_LINES", offset);
+
+	case OpCode::DrawRectangleRounded:
+		return SimpleInstruction("OP_DRAW_RECTANGLE_ROUNDED", offset);
+
+	case OpCode::DrawRectangleRoundedLines:
+		return SimpleInstruction("OP_DRAW_RECTANGLE_ROUNDED_LINES", offset);
+
+	case OpCode::DrawTriangle:
+		return SimpleInstruction("OP_DRAW_TRIANGLE", offset);
+
+	case OpCode::DrawTriangleLines:
+		return SimpleInstruction("OP_DRAW_TRIANGLE_LINES", offset);
+
+	case OpCode::DrawTriangleFan:
+		return SimpleInstruction("OP_DRAW_TRIANGLE_FAN", offset);
+
+	case OpCode::DrawTriangleStrip:
+		return SimpleInstruction("OP_DRAW_TRIANGLE_STRIP", offset);
+
+	case OpCode::DrawPolygon:
+		return SimpleInstruction("OP_DRAW_REGULAR_POLYGON", offset);
+
+	case OpCode::DrawPolygonLines:
+		return SimpleInstruction("OP_DRAW_REGULAR_POLYGON_LINES", offset);
+
+	case OpCode::CheckCollisionRectangle:
+		return SimpleInstruction("OP_CHECK_COLLISION_RECTANGLE", offset);
+
+	case OpCode::CheckCollisionCircle:
+		return SimpleInstruction("OP_CHECK_COLLISION_CIRCLE", offset);
+
+	case OpCode::CheckCollisionCircleRectangle:
+		return SimpleInstruction("OP_CHECK_COLLISION_CIRCLE_RECTANGLE", offset);
+
+	case OpCode::GetCollisionRectangle:
+		return SimpleInstruction("OP_GET_COLLISION_RECTANGLE", offset);
+
+	case OpCode::CheckCollisionPointRectangle:
+		return SimpleInstruction("OP_CHECK_COLLISION_POINT_RECTANGLE", offset);
+
+	case OpCode::CheckCollisionPointCircle:
+		return SimpleInstruction("OP_CHECK_COLLISION_POINT_CIRCLE", offset);
+
+	case OpCode::CheckCollisionPointTriangle:
+		return SimpleInstruction("OP_CHECK_COLLISION_POINT_Triangle", offset);
+#pragma endregion
+
+#pragma region TEXT MODULE
+	case OpCode::DrawFPS:
+		return SimpleInstruction("OP_DRAW_FPS", offset);
+
+	case OpCode::DrawText:
+		return SimpleInstruction("OP_DRAW_TEXT", offset);
+
+	case OpCode::MeasureText:
+		return SimpleInstruction("OP_MEASURE_TEXT", offset);
+#pragma endregion
+#pragma endregion
 
 	default:
 		std::cerr << "Unknown opcode " << instruction << '\n';
@@ -340,6 +549,11 @@ size_t Chunk::ConstantInstructionLong(const std::string& name, size_t offset) co
 size_t Chunk::JumpInstruction(const std::string& name, size_t offset) const
 {
 	uint16_t ip = offset + 3 + static_cast<int16_t>(ReadLong(offset + 1));
-	std::cerr << std::setfill(' ') << std::left << std::setw(16) << name << "  " << std::right << std::setfill('0') << std::setw(4) << ip << '\n';
+	std::cerr << std::setfill(' ') << std::left << std::setw(16) << name << "  " << std::right << std::setfill('0') << std::setw(4) << ip;
+	if (GetMeta(offset + 1) && GetMeta(offset + 1)->Get<std::string>())
+	{
+		std::cerr << std::setfill(' ') << "    @" << *GetMeta(offset + 1)->Get<std::string>();
+	}
+	std::cerr << '\n';
 	return offset + 3;
 }
