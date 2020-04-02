@@ -3,10 +3,15 @@
 #include <map>
 #include <string>
 #include <vector>
+
 #include "value.h"
 
 enum class OpCode : uint8_t
 {
+	None,
+	AsDouble,
+	AsLong,
+	AsString,
 	Constant,
 	ConstantLong,
 	Add,
@@ -21,6 +26,7 @@ enum class OpCode : uint8_t
 	NotEqual,
 	LogicalAnd,
 	LogicalOr,
+	LogicalNot,
 	Duplicate,
 	Pop,
 	Print,
@@ -40,7 +46,78 @@ enum class OpCode : uint8_t
 	JumpIfFalse,
 	JumpToCallStackAddress,
 	PushJumpAddress,
-	Return
+	Return,
+#pragma region RAYLIB OPCODES
+#pragma region CORE MODULE
+	InitWindow,
+	WindowShouldClose,
+	CloseWindow,
+	ShowCursor,
+	HideCursor,
+	ClearBackground,
+	BeginDrawing,
+	EndDrawing,
+	SetTargetFPS,
+	GetTime,
+	GetRandomValue, // TODO: Implement
+	LoadStorageValue, // TODO: Implement
+	SaveStorageValue,
+	IsKeyPressed,
+	IsKeyDown,
+	IsKeyReleased,
+	IsKeyUp,
+	GetKeyPressed,
+	SetExitKey,
+	IsMouseButtonPressed,
+	IsMouseButtonDown,
+	IsMouseButtonReleased,
+	IsMouseButtonUp,
+	GetMouseX,
+	GetMouseY,
+	GetMousePosition,
+	SetMousePosition,
+	SetMouseOffset,
+	SetMouseScale,
+	GetMouseWheelMove,
+#pragma endregion
+#pragma region SHAPES MODULE
+	DrawPixel,
+	DrawLine,
+	DrawLineStrip, // TODO: Implement
+	DrawCircle,
+	DrawCircleSector, // TODO: Implement
+	DrawCircleSectorLines, // TODO: Implement
+	DrawCircleGradient, // TODO: Implement
+	DrawCircleLines,
+	DrawEllipse,
+	DrawEllipseLines,
+	DrawRing, // TODO: Implement
+	DrawRingLines, // TODO: Implement
+	DrawRectangle,
+	DrawRectangleGradient, // TODO: Implement
+	DrawRectangleLines,
+	DrawRectangleRounded, // TODO: Implement
+	DrawRectangleRoundedLines, // TODO: Implement
+	DrawTriangle, // TODO: Implement
+	DrawTriangleLines, // TODO: Implement
+	DrawTriangleFan, // TODO: Implement
+	DrawTriangleStrip, // TODO: Implement
+	DrawPolygon, // TODO: Implement
+	DrawPolygonLines, // TODO: Implement
+	CheckCollisionRectangle, // TODO: Implement
+	CheckCollisionCircle, // TODO: Implement
+	CheckCollisionCircleRectangle, // TODO: Implement
+	GetCollisionRectangle, // TODO: Implement
+	CheckCollisionPointRectangle, // TODO: Implement
+	CheckCollisionPointCircle, // TODO: Implement
+	CheckCollisionPointTriangle, // TODO: Implement
+#pragma endregion
+#pragma region TEXT MODULE
+	DrawFPS, // TODO: Implement
+	DrawText, // TODO: Implement
+	MeasureText // TODO: Implement
+#pragma endregion
+#pragma endregion
 };
 
 class Chunk

@@ -1,7 +1,8 @@
 #include <iostream>
+
 #include "compiler.h"
 
-Compiler::Compiler(const std::string& source) : currentToken(0), currentSymbol("main"), hadError(false), panicMode(false), compiled(false)
+Compiler::Compiler(const std::string& source) : currentToken(0), currentSymbol("!main"), hadError(false), panicMode(false), compiled(false)
 {
 	Scanner scanner(source);
 	Token token;
@@ -55,6 +56,21 @@ bool Compiler::Instruction()
 {
 	switch (CurrentToken()->TokenType)
 	{
+	case Token::Type::AsDouble:
+		EmitByte(OpCode::AsDouble);
+		currentToken++;
+		break;
+
+	case Token::Type::AsLong:
+		EmitByte(OpCode::AsLong);
+		currentToken++;
+		break;
+
+	case Token::Type::AsString:
+		EmitByte(OpCode::AsString);
+		currentToken++;
+		break;
+
 	case Token::Type::Long:
 		EmitConstant(std::stol(CurrentToken()->Lexeme), OpCode::Constant, OpCode::ConstantLong);
 		currentToken++;
@@ -140,6 +156,11 @@ bool Compiler::Instruction()
 		currentToken++;
 		break;
 
+	case Token::Type::LogicalNot:
+		EmitByte(OpCode::LogicalNot);
+		currentToken++;
+		break;
+
 	case Token::Type::Duplicate:
 		EmitByte(OpCode::Duplicate);
 		currentToken++;
@@ -175,11 +196,51 @@ bool Compiler::Instruction()
 		currentToken++;
 		break;
 
+	case Token::Type::Load:
+		if (NextToken() && NextToken()->TokenType == Token::Type::Identifier)
+		{
+			if (NextToken()->HadWhitespace)
+			{
+				ErrorAt(*CurrentToken(), "Invalid trailing whitespace");
+			}
+			else
+			{
+				EmitConstant(NextToken()->Lexeme, OpCode::Load, OpCode::LoadLong);
+			}
+			currentToken += 2;
+		}
+		else
+		{
+			ErrorAt(*CurrentToken(), "Expected an identifier");
+			currentToken++;
+		}
+		break;
+
+	case Token::Type::Store:
+		if (NextToken() && NextToken()->TokenType == Token::Type::Identifier)
+		{
+			if (NextToken()->HadWhitespace)
+			{
+				ErrorAt(*CurrentToken(), "Invalid trailing whitespace");
+			}
+			else
+			{
+				EmitConstant(NextToken()->Lexeme, OpCode::Store, OpCode::StoreLong);
+			}
+			currentToken += 2;
+		}
+		else
+		{
+			ErrorAt(*CurrentToken(), "Expected an identifier");
+			currentToken++;
+		}
+		break;
+
 	case Token::Type::Identifier:
 	{
-		currentToken++;
-		if (currentToken < tokens.size())
+		if (NextToken())
 		{
+			currentToken++;
 			switch (CurrentToken()->TokenType)
 			{
 			case Token::Type::Create:
@@ -249,35 +310,58 @@ bool Compiler::Instruction()
 				}
 				break;
 
-			case Token::Type::Load:
-				if (CurrentToken()->HadWhitespace)
-				{
-					ErrorAt(*PreviousToken(), "Invalid trailing whitespace");
-				}
-				else
-				{
-					EmitConstant(PreviousToken()->Lexeme, OpCode::Load, OpCode::LoadLong);
-					currentToken++;
-				}
-				break;
-
-			case Token::Type::Store:
-				if (CurrentToken()->HadWhitespace)
-				{
-					ErrorAt(*PreviousToken(), "Invalid trailing whitespace");
-				}
-				else
-				{
-					EmitConstant(PreviousToken()->Lexeme, OpCode::Store, OpCode::StoreLong);
-					currentToken++;
-				}
-				break;
-
 			default:
-				ErrorAt(*CurrentToken(), "Invalid use of an identifier");
+				ErrorAt(*PreviousToken(), "Invalid use of an identifier");
 			}
-
 		}
+		else
+		{
+			ErrorAt(*CurrentToken(), "Invalid use of an identifier");
+			currentToken++;
+		}
+		break;
+	}
+
+	case Token::Type::While:
+	{
+		Token whileStart = *CurrentToken();
+		currentToken++;
+		uint16_t whileHeaderStartOffset = EmitByte(OpCode::None);
+		while (CurrentToken() && CurrentToken()->TokenType != Token::Type::Do)
+		{
+			if (CurrentToken()->TokenType == Token::Type::End)
+			{
+				ErrorAt(whileStart, "Unterminated while-loop header");
+				break;
+			}
+			Token cur = *CurrentToken();
+			if (!Instruction())
+			{
+				ErrorAt(whileStart, "Unterminated while-loop header");
+				ErrorAt(cur, "Invalid instruction inside while-loop header");
+				break;
+			}
+		}
+		currentToken++;
+		uint16_t whileHeaderEndOffset = EmitJump(OpCode::JumpIfFalse);
+		while (CurrentToken() && CurrentToken()->TokenType != Token::Type::Loop)
+		{
+			if (CurrentToken()->TokenType == Token::Type::End)
+			{
+				ErrorAt(whileStart, "Unterminated while-loop body");
+				break;
+			}
+			Token cur = *CurrentToken();
+			if (!Instruction())
+			{
+				ErrorAt(whileStart, "Unterminated while-loop body");
+				ErrorAt(cur, "Invalid instruction inside while-loop body");
+				break;
+			}
+		}
+		PatchJump(EmitJump(OpCode::Jump), whileHeaderStartOffset);
+		PatchJump(whileHeaderEndOffset);
+		currentToken++;
 		break;
 	}
 
@@ -431,7 +515,7 @@ void Compiler::PatchJump(uint16_t address, uint16_t jumpAddress)
 
 void Compiler::EndSymbol()
 {
-	if (currentSymbol != "main")
+	if (currentSymbol != "!main")
 	{
 		EmitByte(OpCode::JumpToCallStackAddress);
 	}
