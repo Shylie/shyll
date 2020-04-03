@@ -380,7 +380,7 @@ do \
 				error = "No value on the stack to print"s;
 				return InterpretResult::RuntimeError;
 			}
-			std::cout << stackTop[-1];
+			std::cout << Pop();
 			break;
 
 		case OpCode::PrintLn:
@@ -389,7 +389,7 @@ do \
 				error = "No value on the stack to println"s;
 				return InterpretResult::RuntimeError;
 			}
-			std::cout << stackTop[-1] << '\n';
+			std::cout << Pop() << '\n';
 			break;
 
 		case OpCode::Trace:
