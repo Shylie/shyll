@@ -167,9 +167,8 @@
     <PreBuildEvent>
       <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
 cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform))
-cmake --build . --config $(Configuration)
-exit 0</Command>
+if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
+cmake --build . --config $(Configuration) || exit 0</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugER|Win32'">
@@ -202,7 +201,7 @@ exit 0</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)lib\raylib\$(Platform)\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -213,9 +212,8 @@ exit 0</Command>
     <PreBuildEvent>
       <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
 cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform))
-cmake --build . --config $(Configuration)
-exit 0</Command>
+if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
+cmake --build . --config $(Configuration) || exit 0</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugER|x64'">
@@ -227,7 +225,7 @@ exit 0</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)lib\raylib\$(Platform)\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -263,9 +261,8 @@ exit 0</Command>
     <PreBuildEvent>
       <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
 cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform))
-cmake --build . --config $(Configuration)
-exit 0</Command>
+if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
+cmake --build . --config $(Configuration) || exit 0</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseER|Win32'">
@@ -304,7 +301,6 @@ exit 0</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)lib\raylib\$(Platform)\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -317,9 +313,8 @@ exit 0</Command>
     <PreBuildEvent>
       <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
 cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform))
-cmake --build . --config $(Configuration)
-exit 0</Command>
+if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
+cmake --build . --config $(Configuration) || exit 0</Command>
     </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseER|x64'">
@@ -333,7 +328,6 @@ exit 0</Command>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>$(SolutionDir)lib\raylib\$(Platform)\src\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
