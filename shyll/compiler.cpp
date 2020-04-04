@@ -368,7 +368,13 @@ bool Compiler::Instruction()
 	case Token::Type::If:
 	{
 		Token ifStart = *CurrentToken();
+		Token elseStart;
 		currentToken++;
+		if (!CurrentToken())
+		{
+			ErrorAt(*PreviousToken(), "Unterminated if statement");
+			break;
+		}
 		uint16_t ifOffset = EmitJump(OpCode::JumpIfFalse);
 		uint16_t elseOffset = 0;
 
@@ -395,12 +401,18 @@ bool Compiler::Instruction()
 				}
 				else
 				{
+					elseStart = *CurrentToken();
 					elseOffset = EmitJump(OpCode::Jump);
 					PatchJump(ifOffset);
 					ifPatched = true;
 					currentToken++;
 				}
 			}
+		}
+		if (!CurrentToken())
+		{
+			ErrorAt((ifPatched ? elseStart : ifStart), (ifPatched ? "Unterminated else statement" : "Unterminated if statement"));
+			break;
 		}
 		PatchJump(ifPatched ? elseOffset : ifOffset);
 		break;
