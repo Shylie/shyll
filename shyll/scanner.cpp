@@ -234,6 +234,9 @@ Token::Type Scanner::IdentifierType() const
 
 			case 'q':
 				return CheckKeyword("eq", Token::Type::Equal);
+
+			case 'x':
+				return CheckKeyword("exp", Token::Type::Exponent);
 			}
 		}
 		break;

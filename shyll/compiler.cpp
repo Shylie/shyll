@@ -116,6 +116,11 @@ bool Compiler::Instruction()
 		currentToken++;
 		break;
 
+	case Token::Type::Exponent:
+		EmitByte(OpCode::Exponent);
+		currentToken++;
+		break;
+
 	case Token::Type::LessThan:
 		EmitByte(OpCode::LessThan);
 		currentToken++;

@@ -279,6 +279,24 @@ InterpretResult VM::Interpret(const std::string& source)
 			break;
 		}
 
+		case OpCode::Exponent:
+		{
+			if (stackTop - stack < 2)
+			{
+				error = "Not enough values on stack to perform operation 'exponent'"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<double>() || !stackTop[-2].Get<double>())
+			{
+				error = "Invalid arguments for operation 'exponent'"s;
+				return InterpretResult::RuntimeError;
+			}
+			double exponent = *Pop().Get<double>();
+			double base = *Pop().Get<double>();
+			Push(std::pow(base, exponent));
+			break;
+		}
+
 		case OpCode::LogicalNot:
 			if (stackTop - stack < 1)
 			{

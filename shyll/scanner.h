@@ -29,6 +29,7 @@ public:
 		Subtract,
 		Multiply,
 		Divide,
+		Exponent,
 		LessThan,
 		LessThanEqual,
 		GreaterThan,

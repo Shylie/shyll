@@ -18,6 +18,7 @@ enum class OpCode : uint8_t
 	Subtract,
 	Multiply,
 	Divide,
+	Exponent,
 	LessThan,
 	LessThanEqual,
 	GreaterThan,
