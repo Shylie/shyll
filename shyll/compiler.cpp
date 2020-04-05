@@ -326,6 +326,11 @@ bool Compiler::Instruction()
 	{
 		Token whileStart = *CurrentToken();
 		currentToken++;
+		if (!CurrentToken())
+		{
+			ErrorAt(whileStart, "Unexpected end of file");
+			break;
+		}
 		uint16_t whileHeaderStartOffset = EmitByte(OpCode::None);
 		while (CurrentToken() && CurrentToken()->TokenType != Token::Type::Do)
 		{
@@ -343,6 +348,11 @@ bool Compiler::Instruction()
 			}
 		}
 		currentToken++;
+		if (!CurrentToken())
+		{
+			ErrorAt(*PreviousToken(), "Unexpected end of file");
+			break;
+		}
 		uint16_t whileHeaderEndOffset = EmitJump(OpCode::JumpIfFalse);
 		while (CurrentToken() && CurrentToken()->TokenType != Token::Type::Loop)
 		{
@@ -390,6 +400,11 @@ bool Compiler::Instruction()
 			if (!Instruction())
 			{
 				ErrorAt(cur, "Invalid instruction inside if statement");
+			}
+			if (!CurrentToken())
+			{
+				ErrorAt(ifStart, "Unexpected end of file");
+				break;
 			}
 			if (CurrentToken()->TokenType == Token::Type::Else)
 			{
