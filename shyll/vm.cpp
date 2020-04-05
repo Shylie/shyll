@@ -33,6 +33,7 @@ InterpretResult VM::Interpret(const std::string& source)
 	using namespace std::string_literals;
 
 	while (stackTop > stack) { (--stackTop)->~Value(); }
+	callStack.clear();
 
 	ip = 0;
 	traceLog = ""s;
@@ -1183,7 +1184,17 @@ do \
 std::string VM::ErrorMessage() const
 {
 	using namespace std::string_literals;
-	return "[Line "s + std::to_string(chunk.ReadLine(ip)) + "] "s + *error.Get<std::string>();
+	std::string msg = ""s;
+	for (size_t i = 0; i < callStack.size(); i++)
+	{
+		msg += "[Line "s + std::to_string(chunk.ReadLine(callStack[i])) + "]"s;
+		if (chunk.GetMeta(callStack[i] - 2) && chunk.GetMeta(callStack[i] - 2)->Get<std::string>())
+		{
+			msg += " @"s + *chunk.GetMeta(callStack[i] - 2)->Get<std::string>();
+		}
+		msg += "\n"s;
+	}
+	return msg + "[Line "s + std::to_string(chunk.ReadLine(ip)) + "] "s + *error.Get<std::string>();
 }
 
 bool VM::Push(const Value& value)

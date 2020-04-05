@@ -59,36 +59,34 @@ bool Linker::Link(Chunk& chunk)
 #pragma region SHAPES MODULE
 	MakeSymbol(raylibSymbols, "drawpixel", OpCode::DrawPixel);
 	MakeSymbol(raylibSymbols, "drawline", OpCode::DrawLine);
-	// TODO: Implement.
 	// MakeSymbol(raylibSymbols, "drawlinestrip", OpCode::DrawLineStrip);
 	MakeSymbol(raylibSymbols, "drawcircle", OpCode::DrawCircle);
-	MakeSymbol(raylibSymbols, "drawcirclesector", OpCode::DrawCircleSector);
-	MakeSymbol(raylibSymbols, "drawcirclesectorlines", OpCode::DrawCircleSectorLines);
+	// MakeSymbol(raylibSymbols, "drawcirclesector", OpCode::DrawCircleSector);
+	// MakeSymbol(raylibSymbols, "drawcirclesectorlines", OpCode::DrawCircleSectorLines);
 	MakeSymbol(raylibSymbols, "drawcirclegradient", OpCode::DrawCircleGradient);
 	MakeSymbol(raylibSymbols, "drawcirclelines", OpCode::DrawCircleLines);
 	MakeSymbol(raylibSymbols, "drawellipse", OpCode::DrawEllipse);
 	MakeSymbol(raylibSymbols, "drawellipselines", OpCode::DrawEllipseLines);
-	MakeSymbol(raylibSymbols, "drawring", OpCode::DrawRing);
-	MakeSymbol(raylibSymbols, "drawringlines", OpCode::DrawRingLines);
+	// MakeSymbol(raylibSymbols, "drawring", OpCode::DrawRing);
+	// MakeSymbol(raylibSymbols, "drawringlines", OpCode::DrawRingLines);
 	MakeSymbol(raylibSymbols, "drawrectangle", OpCode::DrawRectangle);
-	MakeSymbol(raylibSymbols, "drawrectanglegradient", OpCode::DrawRectangleGradient);
+	// MakeSymbol(raylibSymbols, "drawrectanglegradient", OpCode::DrawRectangleGradient);
 	MakeSymbol(raylibSymbols, "drawrectanglelines", OpCode::DrawRectangleLines);
-	MakeSymbol(raylibSymbols, "drawrectanglerounded", OpCode::DrawRectangleRounded);
-	MakeSymbol(raylibSymbols, "drawrectangleroundedlines", OpCode::DrawRectangleRoundedLines);
-	MakeSymbol(raylibSymbols, "drawtriangle", OpCode::DrawTriangle);
-	MakeSymbol(raylibSymbols, "drawtrianglelines", OpCode::DrawTriangleLines);
-	// TODO: Implement.
+	// MakeSymbol(raylibSymbols, "drawrectanglerounded", OpCode::DrawRectangleRounded);
+	// MakeSymbol(raylibSymbols, "drawrectangleroundedlines", OpCode::DrawRectangleRoundedLines);
+	// MakeSymbol(raylibSymbols, "drawtriangle", OpCode::DrawTriangle);
+	// MakeSymbol(raylibSymbols, "drawtrianglelines", OpCode::DrawTriangleLines);
 	// MakeSymbol(raylibSymbols, "drawtrianglefan", OpCode::DrawTriangleFan);
 	// MakeSymbol(raylibSymbols, "drawtrianglestrip", OpCode::DrawTriangleStrip);
-	MakeSymbol(raylibSymbols, "drawpolygon", OpCode::DrawPolygon);
-	MakeSymbol(raylibSymbols, "drawpolygonlines", OpCode::DrawPolygonLines);
-	MakeSymbol(raylibSymbols, "checkcollisionrectangle", OpCode::CheckCollisionRectangle);
-	MakeSymbol(raylibSymbols, "checkcollisioncircle", OpCode::CheckCollisionCircle);
-	MakeSymbol(raylibSymbols, "checkcollisioncirclerectangle", OpCode::CheckCollisionCircleRectangle);
-	MakeSymbol(raylibSymbols, "getcollisionrectangle", OpCode::GetCollisionRectangle);
-	MakeSymbol(raylibSymbols, "checkcollisionpointrectangle", OpCode::CheckCollisionPointRectangle);
-	MakeSymbol(raylibSymbols, "checkcollisionpointcircle", OpCode::CheckCollisionPointCircle);
-	MakeSymbol(raylibSymbols, "checkcollisionpointtriangle", OpCode::CheckCollisionPointTriangle);
+	// MakeSymbol(raylibSymbols, "drawpolygon", OpCode::DrawPolygon);
+	// MakeSymbol(raylibSymbols, "drawpolygonlines", OpCode::DrawPolygonLines);
+	// MakeSymbol(raylibSymbols, "checkcollisionrectangle", OpCode::CheckCollisionRectangle);
+	// MakeSymbol(raylibSymbols, "checkcollisioncircle", OpCode::CheckCollisionCircle);
+	// MakeSymbol(raylibSymbols, "checkcollisioncirclerectangle", OpCode::CheckCollisionCircleRectangle);
+	// MakeSymbol(raylibSymbols, "getcollisionrectangle", OpCode::GetCollisionRectangle);
+	// MakeSymbol(raylibSymbols, "checkcollisionpointrectangle", OpCode::CheckCollisionPointRectangle);
+	// MakeSymbol(raylibSymbols, "checkcollisionpointcircle", OpCode::CheckCollisionPointCircle);
+	// MakeSymbol(raylibSymbols, "checkcollisionpointtriangle", OpCode::CheckCollisionPointTriangle);
 #pragma endregion
 
 #pragma region TEXT MODULE

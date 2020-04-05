@@ -28,12 +28,12 @@ int main(int argc, char** argv)
 				return 0;
 
 			case InterpretResult::CompileError:
-				std::cerr << "Compilation error";
+				std::cerr << "Compilation error:";
 				delete vm;
 				return 1;
 
 			case InterpretResult::RuntimeError:
-				std::cerr << "Runtime error: " << vm->ErrorMessage();
+				std::cerr << "Runtime error:\n" << vm->ErrorMessage();
 				delete vm;
 				return 2;
 			}
@@ -88,7 +88,7 @@ int main(int argc, char** argv)
 				break;
 
 			case InterpretResult::RuntimeError:
-				std::cerr << "\nRuntime Error: " << vm->ErrorMessage() << '\n';
+				std::cerr << "\nRuntime Error:\n" << vm->ErrorMessage() << '\n';
 				break;
 			}
 			std::cerr << '\n';
