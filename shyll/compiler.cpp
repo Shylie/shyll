@@ -555,7 +555,7 @@ void Compiler::EndSymbol()
 	{
 		EmitByte(OpCode::Return);
 	}
-#ifdef _DEBUG
+#ifndef NDEBUG
 	CurrentChunk()->Disassemble(currentSymbol);
 	std::cerr << '\n';
 #endif

@@ -32,10 +32,15 @@ int main(int argc, char** argv)
 				delete vm;
 				return 1;
 
+			case InterpretResult::LinkerError:
+				std::cerr << "Linking error:";
+				delete vm;
+				return 2;
+
 			case InterpretResult::RuntimeError:
 				std::cerr << "Runtime error:\n" << vm->ErrorMessage();
 				delete vm;
-				return 2;
+				return 3;
 			}
 		}
 		else
@@ -87,8 +92,13 @@ int main(int argc, char** argv)
 				std::cerr << "\nCompilation Error.\n";
 				break;
 
+			case InterpretResult::LinkerError:
+				std::cerr << "\nLinking Error.\n";
+				break;
+
 			case InterpretResult::RuntimeError:
 				std::cerr << "\nRuntime Error:\n" << vm->ErrorMessage() << '\n';
+				vm->Cleanup(false);
 				break;
 			}
 			std::cerr << '\n';

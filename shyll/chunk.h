@@ -99,8 +99,8 @@ enum class OpCode : uint8_t
 	DrawRectangleLines,
 	DrawRectangleRounded, // TODO: Implement
 	DrawRectangleRoundedLines, // TODO: Implement
-	DrawTriangle, // TODO: Implement
-	DrawTriangleLines, // TODO: Implement
+	DrawTriangle,
+	DrawTriangleLines,
 	DrawTriangleFan, // TODO: Implement
 	DrawTriangleStrip, // TODO: Implement
 	DrawPolygon, // TODO: Implement

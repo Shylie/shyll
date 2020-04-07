@@ -9,11 +9,11 @@ Linker::Linker(const std::string& source) : compiler(source)
 
 }
 
-bool Linker::Link(Chunk& chunk)
+BuildResult Linker::Link(Chunk& chunk)
 {
 	bool success;
 	std::map<std::string, Chunk>& symbols = compiler.Compile(success);
-	if (!success) { return false; }
+	if (!success) { return BuildResult::CompilerError; }
 
 	locs.clear();
 
@@ -74,8 +74,8 @@ bool Linker::Link(Chunk& chunk)
 	MakeSymbol(raylibSymbols, "drawrectanglelines", OpCode::DrawRectangleLines);
 	// MakeSymbol(raylibSymbols, "drawrectanglerounded", OpCode::DrawRectangleRounded);
 	// MakeSymbol(raylibSymbols, "drawrectangleroundedlines", OpCode::DrawRectangleRoundedLines);
-	// MakeSymbol(raylibSymbols, "drawtriangle", OpCode::DrawTriangle);
-	// MakeSymbol(raylibSymbols, "drawtrianglelines", OpCode::DrawTriangleLines);
+	MakeSymbol(raylibSymbols, "drawtriangle", OpCode::DrawTriangle);
+	MakeSymbol(raylibSymbols, "drawtrianglelines", OpCode::DrawTriangleLines);
 	// MakeSymbol(raylibSymbols, "drawtrianglefan", OpCode::DrawTriangleFan);
 	// MakeSymbol(raylibSymbols, "drawtrianglestrip", OpCode::DrawTriangleStrip);
 	// MakeSymbol(raylibSymbols, "drawpolygon", OpCode::DrawPolygon);
@@ -189,12 +189,12 @@ bool Linker::Link(Chunk& chunk)
 		}
 	}
 
-#ifdef _DEBUG
+#ifndef NDEBUG
 	std::cerr << '\n';
 	chunk.Disassemble("code");
 #endif
 
-	return success;
+	return success ? BuildResult::Ok : BuildResult::LinkerError;
 }
 
 bool Linker::MakeSymbol(std::map<std::string, Chunk>& symbols, const std::string& name, OpCode opcode)

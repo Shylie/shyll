@@ -7,6 +7,7 @@
 enum class InterpretResult
 {
 	Ok,
+	LinkerError,
 	CompileError,
 	RuntimeError
 };
@@ -20,6 +21,7 @@ public:
 
 	InterpretResult Interpret(const std::string& source);
 	std::string ErrorMessage() const;
+	void Cleanup(bool clearGlobals);
 
 	static constexpr size_t STACK_MAX = 512;
 

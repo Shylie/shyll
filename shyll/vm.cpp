@@ -26,6 +26,12 @@ VM::VM(const std::string& filename) : ip(0), stack{ }, stackTop(stack), traceLog
 VM::~VM()
 {
 	while (stackTop > stack) { (--stackTop)->~Value(); }
+#ifndef EXCLUDE_RAYLIB
+	if (windowActive)
+	{
+		CloseWindow();
+	}
+#endif
 }
 
 InterpretResult VM::Interpret(const std::string& source)
@@ -39,7 +45,14 @@ InterpretResult VM::Interpret(const std::string& source)
 	traceLog = ""s;
 	error = ""s;
 
-	if (!Linker(source).Link(chunk)) { return InterpretResult::CompileError; }
+	switch (Linker(source).Link(chunk))
+	{
+	case BuildResult::CompilerError:
+		return InterpretResult::CompileError;
+
+	case BuildResult::LinkerError:
+		return InterpretResult::LinkerError;
+	}
 
 #ifndef EXCLUDE_RAYLIB
 	SetTraceLogLevel(LOG_NONE);
@@ -54,7 +67,7 @@ InterpretResult VM::Interpret(const std::string& source)
 		}
 
 		instruction = chunk.Read(ip);
-#ifdef _DEBUG
+#ifndef NDEBUG
 		std::cerr << "\n          ";
 		for (Value* slot = stack; slot < stackTop; slot++)
 		{
@@ -1194,6 +1207,78 @@ do \
 			DrawRectangleLines(x, y, w, h, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
 			break;
 		}
+
+		case OpCode::DrawTriangle:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 10)
+			{
+				error = "Not enough values on stack to draw triangle"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<long>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>() || !stackTop[-9].Get<long>() || !stackTop[-10].Get<long>())
+			{
+				error = "Invalid arguments for draw triangle"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			float y3 = static_cast<float>(*Pop().Get<long>());
+			float x3 = static_cast<float>(*Pop().Get<long>());
+			float y2 = static_cast<float>(*Pop().Get<long>());
+			float x2 = static_cast<float>(*Pop().Get<long>());
+			float y1 = static_cast<float>(*Pop().Get<long>());
+			float x1 = static_cast<float>(*Pop().Get<long>());
+			DrawTriangle(Vector2{ x1, y1 }, Vector2{ x2, y2 }, Vector2{ x3, y3 }, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
+
+		case OpCode::DrawTriangleLines:
+		{
+			if (!windowActive)
+			{
+				error = "Window not active"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!isDrawing)
+			{
+				error = "Not drawing"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (stackTop - stack < 10)
+			{
+				error = "Not enough values on stack to draw triangle lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() || !stackTop[-2].Get<long>() || !stackTop[-3].Get<long>() || !stackTop[-4].Get<long>() || !stackTop[-5].Get<long>() || !stackTop[-6].Get<long>() || !stackTop[-7].Get<long>() || !stackTop[-8].Get<long>() || !stackTop[-9].Get<long>() || !stackTop[-10].Get<long>())
+			{
+				error = "Invalid arguments for draw triangle lines"s;
+				return InterpretResult::RuntimeError;
+			}
+			long a = *Pop().Get<long>();
+			long b = *Pop().Get<long>();
+			long g = *Pop().Get<long>();
+			long r = *Pop().Get<long>();
+			float y3 = static_cast<float>(*Pop().Get<long>());
+			float x3 = static_cast<float>(*Pop().Get<long>());
+			float y2 = static_cast<float>(*Pop().Get<long>());
+			float x2 = static_cast<float>(*Pop().Get<long>());
+			float y1 = static_cast<float>(*Pop().Get<long>());
+			float x1 = static_cast<float>(*Pop().Get<long>());
+			DrawTriangleLines(Vector2{ x1, y1 }, Vector2{ x2, y2 }, Vector2{ x3, y3 }, Color{ static_cast<unsigned char>(r), static_cast<unsigned char>(g), static_cast<unsigned char>(b), static_cast<unsigned char>(a) });
+			break;
+		}
 #endif
 		}
 	}
@@ -1213,6 +1298,18 @@ std::string VM::ErrorMessage() const
 		msg += "\n"s;
 	}
 	return msg + "[Line "s + std::to_string(chunk.ReadLine(ip)) + "] "s + *error.Get<std::string>();
+}
+
+void VM::Cleanup(bool clearGlobals)
+{
+	while (stackTop > stack) { (--stackTop)->~Value(); }
+	if (clearGlobals) { globals.clear(); }
+#ifndef EXCLUDE_RAYLIB
+	if (windowActive)
+	{
+		CloseWindow();
+	}
+#endif
 }
 
 bool VM::Push(const Value& value)

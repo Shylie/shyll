@@ -5,12 +5,19 @@
 #include "chunk.h"
 #include "compiler.h"
 
+enum class BuildResult
+{
+	Ok,
+	CompilerError,
+	LinkerError
+};
+
 class Linker
 {
 public:
 	Linker(const std::string& source);
 
-	bool Link(Chunk& chunk);
+	BuildResult Link(Chunk& chunk);
 
 private:
 	Compiler compiler;
