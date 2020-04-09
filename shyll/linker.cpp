@@ -33,6 +33,7 @@ BuildResult Linker::Link(Chunk& chunk)
 		if (filesFoundIn.size() < 0)
 		{
 			std::cerr << "No main function defined\n";
+			return BuildResult::LinkerError;
 		}
 		else if (filesFoundIn.size() > 1)
 		{
@@ -42,6 +43,7 @@ BuildResult Linker::Link(Chunk& chunk)
 				std::cerr << filesFoundIn[i] << ", ";
 			}
 			std::cerr << filesFoundIn[filesFoundIn.size() - 1] << '\n';
+			return BuildResult::LinkerError;
 		}
 	}
 
