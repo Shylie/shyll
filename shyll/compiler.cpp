@@ -2,54 +2,68 @@
 
 #include "compiler.h"
 
-Compiler::Compiler(const std::string& source) : currentToken(0), currentSymbol("!main"), hadError(false), panicMode(false), compiled(false)
+Compiler::Compiler(const std::string& source) : Compiler(std::map<std::string, std::string>{ std::pair<std::string, std::string>{ std::string("REPL"), source } })
 {
-	Scanner scanner(source);
-	Token token;
-	while ((token = scanner.ScanToken()).TokenType != Token::Type::End) { tokens.push_back(token); }
 }
 
-std::map<std::string, Chunk>& Compiler::Compile(bool& success)
+Compiler::Compiler(const std::map<std::string, std::string>& sources) : currentToken(0), currentSymbol("!main"), hadError(false), panicMode(false), compiled(false)
+{
+	for (auto& [file, source] : sources)
+	{
+		files.push_back(file);
+		Scanner scanner(source);
+		Token token;
+		while ((token = scanner.ScanToken()).TokenType != Token::Type::End) { tokens[file].push_back(token); }
+	}
+}
+
+std::map<std::string, std::map<std::string, Chunk>>* Compiler::Compile(bool& success)
 {
 	if (compiled)
 	{
 		success = !hadError;
-		return symbols;
+		return &symbols;
 	}
 
 	compiled = true;
 
-	while (CurrentToken()) { Instruction(); }
-	currentToken--;
+	for (size_t i = 0; i < files.size(); i++)
+	{
+		currentSymbol = "!main";
+		currentToken = 0;
+		currentFile = files[i];
+		while (CurrentToken()) { Instruction(); }
+		currentToken--;
+		EndSymbol();
+	}
 
-	EndSymbol();
 	success = !hadError;
-	return symbols;
+	return &symbols;
 }
 
 Chunk* Compiler::CurrentChunk()
 {
-	return &symbols[currentSymbol];
+	return &symbols[currentFile][currentSymbol];
 }
 
 const Token* Compiler::PreviousToken()
 {
-	return (currentToken - 1 >= tokens.size()) ? nullptr : &tokens[currentToken - 1];
+	return (currentToken - 1 >= tokens[currentFile].size()) ? nullptr : &tokens[currentFile][currentToken - 1] ;
 }
 
 const Token* Compiler::CurrentToken()
 {
-	return (currentToken >= tokens.size()) ? nullptr : &tokens[currentToken];
+	return (currentToken >= tokens[currentFile].size()) ? nullptr : &tokens[currentFile][currentToken];
 }
 
 const Token* Compiler::NextToken()
 {
-	return (currentToken + 1 >= tokens.size()) ? nullptr : &tokens[currentToken + 1];
+	return (currentToken + 1 >= tokens[currentFile].size()) ? nullptr : &tokens[currentFile][currentToken + 1];
 }
 
 const Token* Compiler::TokenRelative(int offset)
 {
-	return (currentToken + offset >= tokens.size()) ? nullptr : &tokens[currentToken + offset];
+	return (currentToken + offset >= tokens[currentFile].size()) ? nullptr : &tokens[currentFile][currentToken + offset];
 }
 
 bool Compiler::Instruction()
@@ -551,9 +565,14 @@ void Compiler::EndSymbol()
 	{
 		EmitByte(OpCode::JumpToCallStackAddress);
 	}
-	else
+	else if (CurrentChunk()->Size() > 0)
 	{
 		EmitByte(OpCode::Return);
+	}
+	else
+	{
+		symbols[currentFile].erase("!main");
+		return;
 	}
 #ifndef NDEBUG
 	CurrentChunk()->Disassemble(currentSymbol);
@@ -563,7 +582,7 @@ void Compiler::EndSymbol()
 
 void Compiler::WarnAt(const Token& token, const std::string& message)
 {
-	std::cerr << "[Line " << token.Line << "] Error";
+	std::cerr << "[File '" << currentFile << "'][Line " << token.Line << "] Error";
 
 	switch (token.TokenType)
 	{

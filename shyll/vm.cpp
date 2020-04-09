@@ -8,17 +8,9 @@
 #endif
 
 #ifndef EXCLUDE_RAYLIB
-VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), windowActive(false), isDrawing(false), filename("")
+VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), windowActive(false), isDrawing(false)
 #else
-VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), filename("")
-#endif
-{
-}
-
-#ifndef EXCLUDE_RAYLIB
-VM::VM(const std::string& filename) : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), windowActive(false), isDrawing(false), filename(filename)
-#else
-VM::VM(const std::string& filename) : ip(0), stack{ }, stackTop(stack), traceLog(""), error(""), filename(filename)
+VM::VM() : ip(0), stack{ }, stackTop(stack), traceLog(""), error("")
 #endif
 {
 }
@@ -36,6 +28,11 @@ VM::~VM()
 
 InterpretResult VM::Interpret(const std::string& source)
 {
+	return Interpret(std::map<std::string, std::string>{ std::pair<std::string, std::string>{ "REPL", source } });
+}
+
+InterpretResult VM::Interpret(const std::map<std::string, std::string>& sources)
+{
 	using namespace std::string_literals;
 
 	while (stackTop > stack) { (--stackTop)->~Value(); }
@@ -45,7 +42,7 @@ InterpretResult VM::Interpret(const std::string& source)
 	traceLog = ""s;
 	error = ""s;
 
-	switch (Linker(source).Link(chunk))
+	switch (Linker(sources).Link(chunk))
 	{
 	case BuildResult::CompilerError:
 		return InterpretResult::CompileError;

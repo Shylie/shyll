@@ -6,47 +6,51 @@
 
 int main(int argc, char** argv)
 {
-	if (argc == 2)
+	if (argc >= 2)
 	{
-		std::ifstream file(argv[1]);
-
-		if (file.good())
+		std::map<std::string, std::string> sources;
+		for (size_t i = 1; i < argc; i++)
 		{
-			std::stringstream out;
-			out << file.rdbuf();
-			VM* vm = new VM(argv[1]);
-
-			std::cerr << '\n';
-
-			InterpretResult result = vm->Interpret(out.str());
-
-			switch (result)
+			std::ifstream file(argv[i]);
+			if (file.good())
 			{
-			case InterpretResult::Ok:
-
-				delete vm;
-				return 0;
-
-			case InterpretResult::CompileError:
-				std::cerr << "Compilation error:";
-				delete vm;
-				return 1;
-
-			case InterpretResult::LinkerError:
-				std::cerr << "Linking error:";
-				delete vm;
-				return 2;
-
-			case InterpretResult::RuntimeError:
-				std::cerr << "Runtime error:\n" << vm->ErrorMessage();
-				delete vm;
-				return 3;
+				std::stringstream out;
+				out << file.rdbuf();
+				sources[argv[i]] = out.str();
+			}
+			else
+			{
+				std::cerr << "Unable to open file '" << argv[1] << '\'';
+				return -1;
 			}
 		}
-		else
+		VM* vm = new VM();
+
+		std::cerr << '\n';
+
+		InterpretResult result = vm->Interpret(sources);
+
+		switch (result)
 		{
-			std::cerr << "Unable to open file '" << argv[1] << '\'';
-			return -1;
+		case InterpretResult::Ok:
+
+			delete vm;
+			return 0;
+
+		case InterpretResult::CompileError:
+			std::cerr << "Compilation error:";
+			delete vm;
+			return 1;
+
+		case InterpretResult::LinkerError:
+			std::cerr << "Linking error:";
+			delete vm;
+			return 2;
+
+		case InterpretResult::RuntimeError:
+			std::cerr << "Runtime error:\n" << vm->ErrorMessage();
+			delete vm;
+			return 3;
 		}
 	}
 	else

@@ -16,10 +16,10 @@ class VM
 {
 public:
 	VM();
-	VM(const std::string& filename);
 	~VM();
 
 	InterpretResult Interpret(const std::string& source);
+	InterpretResult Interpret(const std::map<std::string, std::string>& sources);
 	std::string ErrorMessage() const;
 	void Cleanup(bool clearGlobals);
 
@@ -34,7 +34,6 @@ private:
 	Value error;
 	std::vector<size_t> callStack;
 	std::map<std::string, Value> globals;
-	std::string filename;
 #ifndef EXCLUDE_RAYLIB
 	bool windowActive;
 	bool isDrawing;

@@ -9,14 +9,17 @@ class Compiler
 {
 public:
 	Compiler(const std::string& source);
+	Compiler(const std::map<std::string, std::string>& sources);
 
-	std::map<std::string, Chunk>& Compile(bool& success);
+	std::map<std::string, std::map<std::string, Chunk>>* Compile(bool& success);
 
 private:
-	std::vector<Token> tokens;
+	std::vector<std::string> files;
+	std::map<std::string, std::vector<Token>> tokens;
+	std::map<std::string, std::map<std::string, Chunk>> symbols;
 	size_t currentToken;
-	std::map<std::string, Chunk> symbols;
 	std::string currentSymbol;
+	std::string currentFile;
 	bool hadError;
 	bool panicMode;
 	bool compiled;
