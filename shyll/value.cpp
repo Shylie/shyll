@@ -179,6 +179,13 @@ const Value Value::operator||(const Value& val) const
 	return Value();
 }
 
+const Value Value::operator-() const
+{
+	if (Get<long>()) { return -*Get<long>(); }
+	else if (Get<double>()) { return -*Get<double>(); }
+	else { return Value(); }
+}
+
 const Value Value::operator!() const
 {
 	if (Get<bool>()) { return !*Get<bool>(); }

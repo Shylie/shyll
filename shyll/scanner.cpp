@@ -297,7 +297,18 @@ Token::Type Scanner::IdentifierType() const
 			switch (source[start + 1])
 			{
 			case 'e':
-				return CheckKeyword("neq", Token::Type::NotEqual);
+				if (current - start > 1)
+				{
+					switch (source[start + 2])
+					{
+					case 'g':
+						return CheckKeyword("neg", Token::Type::Negate);
+
+					case 'q':
+						return CheckKeyword("neq", Token::Type::NotEqual);
+					}
+				}
+				break;
 
 			case 'o':
 				return CheckKeyword("not", Token::Type::LogicalNot);

@@ -252,6 +252,9 @@ size_t Chunk::DisassembleInstruction(size_t offset, size_t dif) const
 	case OpCode::Exponent:
 		return SimpleInstruction("OP_EXPONENT", offset);
 
+	case OpCode::Negate:
+		return SimpleInstruction("OP_NEGATE", offset);
+
 	case OpCode::LessThan:
 		return SimpleInstruction("OP_LESS", offset);
 

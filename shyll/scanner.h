@@ -30,6 +30,7 @@ public:
 		Multiply,
 		Divide,
 		Exponent,
+		Negate,
 		LessThan,
 		LessThanEqual,
 		GreaterThan,

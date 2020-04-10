@@ -135,6 +135,11 @@ bool Compiler::Instruction()
 		currentToken++;
 		break;
 
+	case Token::Type::Negate:
+		EmitByte(OpCode::Negate);
+		currentToken++;
+		break;
+
 	case Token::Type::LessThan:
 		EmitByte(OpCode::LessThan);
 		currentToken++;

@@ -307,10 +307,29 @@ InterpretResult VM::Interpret(const std::map<std::string, std::string>& sources)
 			break;
 		}
 
+		case OpCode::Negate:
+			if (stackTop - stack < 1)
+			{
+				error = "No value on stack to numerically negate"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<long>() && !stackTop[-1].Get<double>())
+			{
+				error = "Invalid argument for numerical negation"s;
+				return InterpretResult::RuntimeError;
+			}
+			Push(-Pop());
+			break;
+
 		case OpCode::LogicalNot:
 			if (stackTop - stack < 1)
 			{
 				error = "No value on stack to logically negate"s;
+				return InterpretResult::RuntimeError;
+			}
+			if (!stackTop[-1].Get<bool>())
+			{
+				error = "Invalid argument for logical negation"s;
 				return InterpretResult::RuntimeError;
 			}
 			Push(!Pop());

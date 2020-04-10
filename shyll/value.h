@@ -44,6 +44,7 @@ public:
 	const Value operator&&(const Value& val) const;
 	const Value operator||(const Value& val) const;
 
+	const Value operator-() const;
 	const Value operator!() const;
 
 private:
