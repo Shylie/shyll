@@ -162,14 +162,9 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
-      <AdditionalDependencies>$(SolutionDir)lib\raylib\$(Platform)\src\$(Configuration)\raylib_static.lib;$(SolutionDir)lib\raylib\$(Platform)\src\external\glfw\src\$(Configuration)\glfw3.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin\$(Platform)\$(Configuration)\raylib.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
-cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
-cmake --build . --config $(Configuration) || exit 0</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugER|Win32'">
     <ClCompile>
@@ -187,10 +182,7 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -207,14 +199,9 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
-      <AdditionalDependencies>$(SolutionDir)lib\raylib\$(Platform)\src\$(Configuration)\raylib_static.lib;$(SolutionDir)lib\raylib\$(Platform)\src\external\glfw\src\$(Configuration)\glfw3.lib;winmm.lib;;%(AdditionalDependencies);%(AdditionalDependencies);%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin\$(Platform)\$(Configuration)\raylib.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
-cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
-cmake --build . --config $(Configuration) || exit 0</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='DebugER|x64'">
     <ClCompile>
@@ -232,10 +219,7 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -255,14 +239,9 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
-      <AdditionalDependencies>$(SolutionDir)lib\raylib\$(Platform)\src\$(Configuration)\raylib_static.lib;$(SolutionDir)lib\raylib\$(Platform)\src\external\glfw\src\$(Configuration)\glfw3.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin\$(Platform)\$(Configuration)\raylib.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
-cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
-cmake --build . --config $(Configuration) || exit 0</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseER|Win32'">
     <ClCompile>
@@ -283,10 +262,7 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -306,14 +282,9 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
-      <AdditionalDependencies>$(SolutionDir)lib\raylib\$(Platform)\src\$(Configuration)\raylib_static.lib;$(SolutionDir)lib\raylib\$(Platform)\src\external\glfw\src\$(Configuration)\glfw3.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>$(SolutionDir)bin\$(Platform)\$(Configuration)\raylib.lib;winmm.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PreBuildEvent>
-      <Command>if not exist "$(SolutionDir)lib\raylib\$(Platform)\" (mkdir "$(SolutionDir)lib\raylib\$(Platform)")
-cd "$(SolutionDir)lib\raylib\$(Platform)\"
-if not exist "$(SolutionDir)lib\raylib\$(Platform)\*.sln" (cmake .. -A $(Platform) -DBUILD_EXAMPLES=OFF -DBUILD_GAMES=OFF)
-cmake --build . --config $(Configuration) || exit 0</Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseER|x64'">
     <ClCompile>
@@ -334,10 +305,7 @@ cmake --build . --config $(Configuration) || exit 0</Command>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <Profile>true</Profile>
     </Link>
-    <PreBuildEvent>
-      <Command>
-      </Command>
-    </PreBuildEvent>
+    <PreBuildEvent />
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="chunk.cpp" />

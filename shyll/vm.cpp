@@ -4,7 +4,7 @@
 #include "linker.h"
 
 #ifndef EXCLUDE_RAYLIB
-#include "raylib.h"
+#include "..\lib\raylib\src\raylib.h"
 #endif
 
 #ifndef EXCLUDE_RAYLIB
