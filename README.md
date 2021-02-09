@@ -1,2 +1,2 @@
 # shyll
-Shyll is a stack-based toy language using reverse polish notation. Click [here](https://github.com/Shylie/shyll/wiki) for more info.
+Shyll is a stack-based interpreted language written in C++. It features a [lexer](https://en.wikipedia.org/wiki/Lexical_analysis), [compiler](https://en.wikipedia.org/wiki/Compiler), [linker](https://en.wikipedia.org/wiki/Linker_(computing)) and optional graphics module using [raylib](https://github.com/raysan5/raylib/) for basic graphics. Click [here](https://github.com/Shylie/shyll/wiki) for info on how to compile and use shyll.
